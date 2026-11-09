@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Raw image dataset
+ml/ewaste_classification/dataset/raw/*
+!ml/ewaste_classification/dataset/raw/.gitkeep
+
+# Processed image dataset
+ml/ewaste_classification/dataset/processed/*
+!ml/ewaste_classification/dataset/processed/.gitkeep
+
+# Trained model files
+ml/ewaste_classification/model/*
+!ml/ewaste_classification/model/.gitkeep
+
+# Model artifacts
+*.keras
+*.h5
+*.weights.h5
+*.tflite
+*.onnx
