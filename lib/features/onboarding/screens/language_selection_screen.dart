@@ -21,23 +21,16 @@ class _LanguageSelectionScreenState
   String? _selectedLocale;
 
   static const List<_LanguageOption> _languages = [
-    _LanguageOption(code: 'en', name: 'English', nativeName: 'English',
-        emoji: '🇬🇧'),
-    _LanguageOption(code: 'hi', name: 'Hindi', nativeName: 'हिन्दी',
-        emoji: '🇮🇳'),
-    _LanguageOption(code: 'kn', name: 'Kannada', nativeName: 'ಕನ್ನಡ',
-        emoji: '🇮🇳'),
-    _LanguageOption(code: 'te', name: 'Telugu', nativeName: 'తెలుగు',
-        emoji: '🇮🇳'),
-    _LanguageOption(code: 'ur', name: 'Urdu', nativeName: 'اردو',
-        emoji: '🇵🇰'),
+    _LanguageOption(code: 'en', name: 'English', nativeName: 'English'),
+    _LanguageOption(code: 'hi', name: 'Hindi', nativeName: 'हिन्दी'),
+    _LanguageOption(code: 'kn', name: 'Kannada', nativeName: 'ಕನ್ನಡ'),
+    _LanguageOption(code: 'te', name: 'Telugu', nativeName: 'తెలుగు'),
+    _LanguageOption(code: 'ur', name: 'Urdu', nativeName: 'اردو'),
   ];
 
   Future<void> _onContinue() async {
     if (_selectedLocale == null) return;
-    await ref
-        .read(localeProvider.notifier)
-        .setLocale(Locale(_selectedLocale!));
+    await ref.read(localeProvider.notifier).setLocale(Locale(_selectedLocale!));
     if (mounted) context.go(AppConstants.routeLanding);
   }
 
@@ -66,8 +59,8 @@ class _LanguageSelectionScreenState
                 Text(
                   'अपनी भाषा चुनें • ನಿಮ್ಮ ಭಾಷೆ ಆಯ್ಕೆ ಮಾಡಿ',
                   textAlign: TextAlign.center,
-                  style: AppTextStyles.bodySmall
-                      .copyWith(color: Colors.white70),
+                  style:
+                      AppTextStyles.bodySmall.copyWith(color: Colors.white70),
                 ),
                 const SizedBox(height: 36),
                 Expanded(
@@ -120,9 +113,8 @@ class _LanguageTile extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         decoration: BoxDecoration(
-          color: isSelected
-              ? Colors.white
-              : Colors.white.withValues(alpha: 0.1),
+          color:
+              isSelected ? Colors.white : Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isSelected
@@ -133,8 +125,6 @@ class _LanguageTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Text(language.emoji, style: const TextStyle(fontSize: 24)),
-            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -142,18 +132,15 @@ class _LanguageTile extends StatelessWidget {
                   Text(
                     language.nativeName,
                     style: AppTextStyles.titleMedium.copyWith(
-                      color: isSelected
-                          ? AppColors.primaryDark
-                          : Colors.white,
+                      color: isSelected ? AppColors.primaryDark : Colors.white,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   Text(
                     language.name,
                     style: AppTextStyles.bodySmall.copyWith(
-                      color: isSelected
-                          ? AppColors.textSecondary
-                          : Colors.white70,
+                      color:
+                          isSelected ? AppColors.textSecondary : Colors.white70,
                     ),
                   ),
                 ],
@@ -174,11 +161,9 @@ class _LanguageOption {
     required this.code,
     required this.name,
     required this.nativeName,
-    required this.emoji,
   });
 
   final String code;
   final String name;
   final String nativeName;
-  final String emoji;
 }

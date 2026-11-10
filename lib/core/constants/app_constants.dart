@@ -17,4 +17,11 @@ class AppConstants {
   static const String routeLanding = '/landing';
   static const String routeLogin = '/login';
   static const String routeRegister = '/register';
+  static const String routeForgotPassword = '/forgot-password';
+  static const String routeOtpVerification = '/otp/:purpose';
+  static const String routeNewPassword = '/new-password';
+  static const String routeCollectorInvitation = '/collector-invitation';
+  static const String routeTraderApplication = '/trader-application';
+  static const String routeTraderApplicationStatus =
+      '/trader-application/status';
 }

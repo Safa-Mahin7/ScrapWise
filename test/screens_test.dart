@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:scrapwise/core/theme/app_theme.dart';
 import 'package:scrapwise/features/onboarding/screens/landing_screen.dart';
@@ -7,11 +8,19 @@ import 'package:scrapwise/features/onboarding/screens/language_selection_screen.
 import 'package:scrapwise/features/onboarding/screens/splash_screen.dart';
 import 'package:scrapwise/features/auth/screens/login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:scrapwise/l10n/app_localizations.dart';
 
 Widget _testScreen(Widget screen) {
   return ProviderScope(
     child: MaterialApp(
       theme: AppTheme.light,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
       home: screen,
     ),
   );
@@ -77,7 +86,8 @@ void main() {
       expect(find.text('Sign In'), findsOneWidget);
     });
 
-    testWidgets('shows validation errors when fields are empty', (tester) async {
+    testWidgets('shows validation errors when fields are empty',
+        (tester) async {
       await tester.pumpWidget(_testScreen(const LoginScreen()));
       await tester.pump();
 
@@ -107,7 +117,8 @@ void main() {
       // Verify pending auth dialog appears
       expect(find.text('Authentication Pending'), findsOneWidget);
       expect(
-          find.textContaining('Backend authentication integration is in progress'),
+          find.textContaining(
+              'Backend authentication integration is in progress'),
           findsOneWidget);
     });
   });

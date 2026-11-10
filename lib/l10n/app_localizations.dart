@@ -277,6 +277,360 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Only Household users can self-register. Collector and Trader accounts are activated through controlled onboarding.'**
   String get selfRegisterNote;
+
+  /// No description provided for @fullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get fullName;
+
+  /// No description provided for @locality.
+  ///
+  /// In en, this message translates to:
+  /// **'Locality'**
+  String get locality;
+
+  /// No description provided for @confirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Password'**
+  String get confirmPassword;
+
+  /// No description provided for @nameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your full name'**
+  String get nameHint;
+
+  /// No description provided for @localityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your locality'**
+  String get localityHint;
+
+  /// No description provided for @passwordCreateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a password'**
+  String get passwordCreateHint;
+
+  /// No description provided for @confirmPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enter your password'**
+  String get confirmPasswordHint;
+
+  /// No description provided for @nameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your full name'**
+  String get nameRequired;
+
+  /// No description provided for @localityRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your locality'**
+  String get localityRequired;
+
+  /// No description provided for @mobileRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your mobile number'**
+  String get mobileRequired;
+
+  /// No description provided for @mobileInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid 10-digit number'**
+  String get mobileInvalid;
+
+  /// No description provided for @passwordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your password'**
+  String get passwordRequired;
+
+  /// No description provided for @passwordTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get passwordTooShort;
+
+  /// No description provided for @confirmPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please confirm your password'**
+  String get confirmPasswordRequired;
+
+  /// No description provided for @passwordsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordsDoNotMatch;
+
+  /// No description provided for @authUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in isn\'t available until the authentication service is connected. No account session was created.'**
+  String get authUnavailable;
+
+  /// No description provided for @forgotPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset your password'**
+  String get forgotPasswordTitle;
+
+  /// No description provided for @forgotPasswordHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the mobile number for your account. Code delivery is not available yet.'**
+  String get forgotPasswordHelp;
+
+  /// No description provided for @sendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get sendCode;
+
+  /// No description provided for @otpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your phone'**
+  String get otpTitle;
+
+  /// No description provided for @otpCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification code'**
+  String get otpCode;
+
+  /// No description provided for @otpCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code'**
+  String get otpCodeHint;
+
+  /// No description provided for @otpCodeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code'**
+  String get otpCodeRequired;
+
+  /// No description provided for @otpNotSentMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This screen is ready for phone verification, but no code has been sent or verified because the authentication backend is not connected.'**
+  String get otpNotSentMessage;
+
+  /// No description provided for @verificationUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification isn\'t available until the authentication backend is connected. Nothing has been verified.'**
+  String get verificationUnavailable;
+
+  /// No description provided for @resendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend code'**
+  String get resendCode;
+
+  /// No description provided for @verifyCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify code'**
+  String get verifyCode;
+
+  /// No description provided for @newPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new password'**
+  String get newPasswordTitle;
+
+  /// No description provided for @newPasswordHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'This form is a UI scaffold. A verified recovery session is required to reset a password.'**
+  String get newPasswordHelp;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New Password'**
+  String get newPassword;
+
+  /// No description provided for @confirmNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm New Password'**
+  String get confirmNewPassword;
+
+  /// No description provided for @changeMobileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change mobile number'**
+  String get changeMobileTitle;
+
+  /// No description provided for @changeMobileHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'This account setting is available to signed-in users after authentication is integrated.'**
+  String get changeMobileHelp;
+
+  /// No description provided for @currentMobile.
+  ///
+  /// In en, this message translates to:
+  /// **'Current mobile number'**
+  String get currentMobile;
+
+  /// No description provided for @newMobileNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'New mobile number'**
+  String get newMobileNumber;
+
+  /// No description provided for @collectorInvitationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Activate collector invitation'**
+  String get collectorInvitationTitle;
+
+  /// No description provided for @collectorInvitationHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Collector access requires a valid invitation. This form does not create public collector accounts.'**
+  String get collectorInvitationHelp;
+
+  /// No description provided for @invitationCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation code'**
+  String get invitationCode;
+
+  /// No description provided for @invitationCodeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your invitation code'**
+  String get invitationCodeRequired;
+
+  /// No description provided for @activateInvitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Activate invitation'**
+  String get activateInvitation;
+
+  /// No description provided for @collectorInvitationRequiredNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Collector activation requires server-side invitation verification. No invitation has been checked.'**
+  String get collectorInvitationRequiredNote;
+
+  /// No description provided for @traderApplicationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Trader business application'**
+  String get traderApplicationTitle;
+
+  /// No description provided for @traderApplicationHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit a business application for review. Trader privileges are not granted automatically.'**
+  String get traderApplicationHelp;
+
+  /// No description provided for @businessName.
+  ///
+  /// In en, this message translates to:
+  /// **'Business name'**
+  String get businessName;
+
+  /// No description provided for @businessNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your business name'**
+  String get businessNameRequired;
+
+  /// No description provided for @submitApplication.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit application'**
+  String get submitApplication;
+
+  /// No description provided for @pendingApprovalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Trader approval review'**
+  String get pendingApprovalTitle;
+
+  /// No description provided for @pendingApprovalHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Trader access is granted only after an application is reviewed. No application has been submitted from this screen.'**
+  String get pendingApprovalHelp;
+
+  /// No description provided for @illustrativeStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Example status: Pending review. No application is linked to this device.'**
+  String get illustrativeStatus;
+
+  /// No description provided for @approvalInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'View approval information'**
+  String get approvalInfo;
+
+  /// No description provided for @collectorInviteLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Have a collector invitation?'**
+  String get collectorInviteLink;
+
+  /// No description provided for @traderApplicationLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply as a trader'**
+  String get traderApplicationLink;
+
+  /// No description provided for @showPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get showPassword;
+
+  /// No description provided for @hidePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get hidePassword;
+
+  /// No description provided for @phoneChangeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue to phone verification'**
+  String get phoneChangeAction;
+
+  /// No description provided for @previewNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview new password form'**
+  String get previewNewPassword;
+
+  /// No description provided for @accountCreationUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Account creation isn\'t available until the authentication service is connected. No account was created.'**
+  String get accountCreationUnavailable;
+
+  /// No description provided for @applicationUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Application submission is unavailable until the backend is connected. No application was submitted.'**
+  String get applicationUnavailable;
+
+  /// No description provided for @passwordResetUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Password reset is unavailable until the authentication backend is connected. No password was changed.'**
+  String get passwordResetUnavailable;
 }
 
 class _AppLocalizationsDelegate

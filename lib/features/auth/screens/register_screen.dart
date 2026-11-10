@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/sw_button.dart';
 import '../../../core/widgets/sw_text_field.dart';
+import '../../../l10n/app_localizations.dart';
+import '../widgets/auth_components.dart';
 
-/// Register screen — only for Household users.
-/// Auth is stubbed; shows pending dialog on submit.
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -18,13 +15,17 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
   final _mobileController = TextEditingController();
+  final _localityController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
 
   @override
   void dispose() {
+    _nameController.dispose();
     _mobileController.dispose();
+    _localityController.dispose();
     _passwordController.dispose();
     _confirmController.dispose();
     super.dispose();
@@ -32,22 +33,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   void _onRegister() {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    _showAuthPendingDialog();
-  }
-
-  void _showAuthPendingDialog() {
+    final l10n = AppLocalizations.of(context);
     showDialog<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Authentication Pending'),
-        content: const Text(
-          'Backend authentication integration is in progress. '
-          'Sign-in functionality will be available once the FastAPI service is connected.',
-        ),
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.authPendingTitle),
+        content: Text(l10n.accountCreationUnavailable),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('OK'),
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(l10n.ok),
           ),
         ],
       ),
@@ -56,170 +51,103 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: Colors.white,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          onPressed: () => context.go(AppConstants.routeLanding),
-        ),
-      ),
-      extendBodyBehindAppBar: true,
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.primaryGradient),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 16),
-                  Text(
-                    'Create Account',
-                    textAlign: TextAlign.center,
-                    style: AppTextStyles.headlineMedium
-                        .copyWith(color: Colors.white),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Household users only',
-                    textAlign: TextAlign.center,
-                    style: AppTextStyles.bodyMedium
-                        .copyWith(color: Colors.white70),
-                  ),
-                  const SizedBox(height: 40),
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: AppColors.background,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.15),
-                          blurRadius: 20,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          SwTextField(
-                            controller: _mobileController,
-                            label: 'Mobile Number',
-                            hint: 'Enter your mobile number',
-                            keyboardType: TextInputType.phone,
-                            prefixIcon: Icons.phone_android_rounded,
-                            textInputAction: TextInputAction.next,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                              LengthLimitingTextInputFormatter(10),
-                            ],
-                            autofillHints: const [AutofillHints.telephoneNumber],
-                            validator: (v) {
-                              if (v == null || v.isEmpty) {
-                                return 'Please enter your mobile number';
-                              }
-                              if (v.length < 10) {
-                                return 'Enter a valid 10-digit number';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          SwTextField(
-                            controller: _passwordController,
-                            label: 'Password',
-                            hint: 'Create a password',
-                            obscureText: true,
-                            prefixIcon: Icons.lock_outline_rounded,
-                            textInputAction: TextInputAction.next,
-                            autofillHints: const [AutofillHints.newPassword],
-                            validator: (v) {
-                              if (v == null || v.isEmpty) {
-                                return 'Please enter a password';
-                              }
-                              if (v.length < 6) {
-                                return 'Password must be at least 6 characters';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          SwTextField(
-                            controller: _confirmController,
-                            label: 'Confirm Password',
-                            hint: 'Re-enter your password',
-                            obscureText: true,
-                            prefixIcon: Icons.lock_outline_rounded,
-                            textInputAction: TextInputAction.done,
-                            onFieldSubmitted: (_) => _onRegister(),
-                            autofillHints: const [AutofillHints.newPassword],
-                            validator: (v) {
-                              if (v == null || v.isEmpty) {
-                                return 'Please confirm your password';
-                              }
-                              if (v != _passwordController.text) {
-                                return 'Passwords do not match';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 24),
-                          SwButton(
-                            label: 'Create Account',
-                            onPressed: _onRegister,
-                          ),
-                          const SizedBox(height: 20),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text(
-                                'Already have an account? ',
-                                style: AppTextStyles.bodySmall,
-                              ),
-                              GestureDetector(
-                                onTap: () =>
-                                    context.go(AppConstants.routeLogin),
-                                child: Text(
-                                  'Sign In',
-                                  style: AppTextStyles.bodySmall.copyWith(
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: AppColors.surfaceVariant,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              'Only Household users can self-register. Collector and Trader accounts are activated through controlled onboarding.',
-                              textAlign: TextAlign.center,
-                              style: AppTextStyles.caption.copyWith(
-                                color: AppColors.textSecondary,
-                                height: 1.5,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+    final l10n = AppLocalizations.of(context);
+    return AuthScreenShell(
+      title: l10n.createAccount,
+      subtitle: l10n.selfRegisterNote,
+      onBack: () => context.go(AppConstants.routeLanding),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SwTextField(
+              controller: _nameController,
+              label: l10n.fullName,
+              hint: l10n.nameHint,
+              prefixIcon: Icons.person_outline_rounded,
+              textInputAction: TextInputAction.next,
+              autofillHints: const [AutofillHints.name],
+              validator: (value) => value == null || value.trim().isEmpty
+                  ? l10n.nameRequired
+                  : null,
+            ),
+            const SizedBox(height: 16),
+            SwTextField(
+              controller: _mobileController,
+              label: l10n.mobileNumber,
+              hint: l10n.mobileHint,
+              keyboardType: TextInputType.phone,
+              prefixIcon: Icons.phone_android_rounded,
+              textInputAction: TextInputAction.next,
+              inputFormatters: mobileInputFormatters,
+              autofillHints: const [AutofillHints.telephoneNumber],
+              validator: (value) => validateMobileNumber(
+                value,
+                l10n.mobileRequired,
+                l10n.mobileInvalid,
               ),
             ),
-          ),
+            const SizedBox(height: 16),
+            SwTextField(
+              controller: _localityController,
+              label: l10n.locality,
+              hint: l10n.localityHint,
+              prefixIcon: Icons.location_on_outlined,
+              textInputAction: TextInputAction.next,
+              validator: (value) => value == null || value.trim().isEmpty
+                  ? l10n.localityRequired
+                  : null,
+            ),
+            const SizedBox(height: 16),
+            SwTextField(
+              controller: _passwordController,
+              label: l10n.password,
+              hint: l10n.passwordCreateHint,
+              obscureText: true,
+              showPasswordLabel: l10n.showPassword,
+              hidePasswordLabel: l10n.hidePassword,
+              prefixIcon: Icons.lock_outline_rounded,
+              textInputAction: TextInputAction.next,
+              autofillHints: const [AutofillHints.newPassword],
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return l10n.passwordRequired;
+                }
+                if (value.length < 6) return l10n.passwordTooShort;
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            SwTextField(
+              controller: _confirmController,
+              label: l10n.confirmPassword,
+              hint: l10n.confirmPasswordHint,
+              obscureText: true,
+              showPasswordLabel: l10n.showPassword,
+              hidePasswordLabel: l10n.hidePassword,
+              prefixIcon: Icons.lock_outline_rounded,
+              textInputAction: TextInputAction.done,
+              onFieldSubmitted: (_) => _onRegister(),
+              autofillHints: const [AutofillHints.newPassword],
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return l10n.confirmPasswordRequired;
+                }
+                if (value != _passwordController.text) {
+                  return l10n.passwordsDoNotMatch;
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 24),
+            SwButton(label: l10n.createAccount, onPressed: _onRegister),
+            const SizedBox(height: 16),
+            TextButton(
+              onPressed: () => context.go(AppConstants.routeLogin),
+              child: Text(l10n.signIn),
+            ),
+          ],
         ),
       ),
     );

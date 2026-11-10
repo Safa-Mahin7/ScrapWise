@@ -17,6 +17,8 @@ class SwTextField extends StatefulWidget {
     this.onFieldSubmitted,
     this.focusNode,
     this.autofillHints,
+    this.showPasswordLabel,
+    this.hidePasswordLabel,
   });
 
   final TextEditingController controller;
@@ -31,6 +33,8 @@ class SwTextField extends StatefulWidget {
   final void Function(String)? onFieldSubmitted;
   final FocusNode? focusNode;
   final Iterable<String>? autofillHints;
+  final String? showPasswordLabel;
+  final String? hidePasswordLabel;
 
   @override
   State<SwTextField> createState() => _SwTextFieldState();
@@ -60,16 +64,16 @@ class _SwTextFieldState extends State<SwTextField> {
       decoration: InputDecoration(
         labelText: widget.label,
         hintText: widget.hint,
-        prefixIcon: widget.prefixIcon != null
-            ? Icon(widget.prefixIcon)
-            : null,
+        prefixIcon: widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,
         suffixIcon: widget.obscureText
             ? IconButton(
                 icon: Icon(_obscure
                     ? Icons.visibility_outlined
                     : Icons.visibility_off_outlined),
                 onPressed: () => setState(() => _obscure = !_obscure),
-                tooltip: _obscure ? 'Show password' : 'Hide password',
+                tooltip: _obscure
+                    ? widget.showPasswordLabel ?? 'Show password'
+                    : widget.hidePasswordLabel ?? 'Hide password',
               )
             : null,
       ),

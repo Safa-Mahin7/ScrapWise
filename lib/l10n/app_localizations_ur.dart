@@ -96,4 +96,195 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get selfRegisterNote => 'صرف گھریلو صارفین خود رجسٹر کر سکتے ہیں۔';
+
+  @override
+  String get fullName => 'پورا نام';
+
+  @override
+  String get locality => 'علاقہ';
+
+  @override
+  String get confirmPassword => 'پاس ورڈ کی تصدیق کریں';
+
+  @override
+  String get nameHint => 'اپنا پورا نام درج کریں';
+
+  @override
+  String get localityHint => 'اپنا علاقہ درج کریں';
+
+  @override
+  String get passwordCreateHint => 'پاس ورڈ بنائیں';
+
+  @override
+  String get confirmPasswordHint => 'پاس ورڈ دوبارہ درج کریں';
+
+  @override
+  String get nameRequired => 'براہ کرم اپنا پورا نام درج کریں';
+
+  @override
+  String get localityRequired => 'براہ کرم اپنا علاقہ درج کریں';
+
+  @override
+  String get mobileRequired => 'براہ کرم موبائل نمبر درج کریں';
+
+  @override
+  String get mobileInvalid => 'درست 10 ہندسوں کا نمبر درج کریں';
+
+  @override
+  String get passwordRequired => 'براہ کرم پاس ورڈ درج کریں';
+
+  @override
+  String get passwordTooShort => 'پاس ورڈ کم از کم 6 حروف کا ہونا چاہیے';
+
+  @override
+  String get confirmPasswordRequired => 'براہ کرم پاس ورڈ کی تصدیق کریں';
+
+  @override
+  String get passwordsDoNotMatch => 'پاس ورڈ میل نہیں کھاتے';
+
+  @override
+  String get authUnavailable =>
+      'توثیق سروس منسلک ہونے تک سائن ان دستیاب نہیں۔ کوئی اکاؤنٹ سیشن نہیں بنایا گیا۔';
+
+  @override
+  String get forgotPasswordTitle => 'پاس ورڈ دوبارہ ترتیب دیں';
+
+  @override
+  String get forgotPasswordHelp =>
+      'اپنے اکاؤنٹ کا موبائل نمبر درج کریں۔ کوڈ بھیجنے کی سہولت ابھی دستیاب نہیں۔';
+
+  @override
+  String get sendCode => 'جاری رکھیں';
+
+  @override
+  String get otpTitle => 'اپنے فون کی تصدیق کریں';
+
+  @override
+  String get otpCode => 'تصدیقی کوڈ';
+
+  @override
+  String get otpCodeHint => '6 ہندسوں کا کوڈ درج کریں';
+
+  @override
+  String get otpCodeRequired => '6 ہندسوں کا کوڈ درج کریں';
+
+  @override
+  String get otpNotSentMessage =>
+      'یہ فون کی تصدیق کی اسکرین ہے، لیکن توثیق بیک اینڈ منسلک نہ ہونے کے باعث کوئی کوڈ نہیں بھیجا یا تصدیق کیا گیا۔';
+
+  @override
+  String get verificationUnavailable =>
+      'توثیق بیک اینڈ منسلک ہونے تک تصدیق دستیاب نہیں۔ کچھ بھی تصدیق نہیں ہوا۔';
+
+  @override
+  String get resendCode => 'کوڈ دوبارہ بھیجیں';
+
+  @override
+  String get verifyCode => 'کوڈ کی تصدیق کریں';
+
+  @override
+  String get newPasswordTitle => 'نیا پاس ورڈ بنائیں';
+
+  @override
+  String get newPasswordHelp =>
+      'یہ صرف UI اسکرین ہے۔ پاس ورڈ بدلنے کے لیے تصدیق شدہ ریکوری سیشن درکار ہے۔';
+
+  @override
+  String get newPassword => 'نیا پاس ورڈ';
+
+  @override
+  String get confirmNewPassword => 'نئے پاس ورڈ کی تصدیق کریں';
+
+  @override
+  String get changeMobileTitle => 'موبائل نمبر تبدیل کریں';
+
+  @override
+  String get changeMobileHelp =>
+      'توثیق کے انضمام کے بعد یہ اکاؤنٹ سہولت سائن ان صارفین کے لیے دستیاب ہوگی۔';
+
+  @override
+  String get currentMobile => 'موجودہ موبائل نمبر';
+
+  @override
+  String get newMobileNumber => 'نیا موبائل نمبر';
+
+  @override
+  String get collectorInvitationTitle => 'کلیکٹر دعوت فعال کریں';
+
+  @override
+  String get collectorInvitationHelp =>
+      'کلیکٹر رسائی کے لیے درست دعوت ضروری ہے۔ یہ فارم عوامی کلیکٹر اکاؤنٹ نہیں بناتا۔';
+
+  @override
+  String get invitationCode => 'دعوتی کوڈ';
+
+  @override
+  String get invitationCodeRequired => 'اپنا دعوتی کوڈ درج کریں';
+
+  @override
+  String get activateInvitation => 'دعوت فعال کریں';
+
+  @override
+  String get collectorInvitationRequiredNote =>
+      'کلیکٹر کو فعال کرنے کے لیے سرور پر دعوت کی تصدیق ضروری ہے۔ کوئی دعوت نہیں جانچی گئی۔';
+
+  @override
+  String get traderApplicationTitle => 'تاجر کاروباری درخواست';
+
+  @override
+  String get traderApplicationHelp =>
+      'جائزے کے لیے کاروباری درخواست دیں۔ تاجر کے اختیارات خودکار طور پر نہیں ملتے۔';
+
+  @override
+  String get businessName => 'کاروبار کا نام';
+
+  @override
+  String get businessNameRequired => 'براہ کرم کاروبار کا نام درج کریں';
+
+  @override
+  String get submitApplication => 'درخواست جمع کریں';
+
+  @override
+  String get pendingApprovalTitle => 'تاجر منظوری کا جائزہ';
+
+  @override
+  String get pendingApprovalHelp =>
+      'درخواست کے جائزے کے بعد ہی تاجر کی رسائی ملتی ہے۔ اس اسکرین سے کوئی درخواست جمع نہیں ہوئی۔';
+
+  @override
+  String get illustrativeStatus =>
+      'مثالی حیثیت: جائزہ زیر التوا۔ اس آلے سے کوئی درخواست منسلک نہیں۔';
+
+  @override
+  String get approvalInfo => 'منظوری کی معلومات دیکھیں';
+
+  @override
+  String get collectorInviteLink => 'کیا آپ کے پاس کلیکٹر کی دعوت ہے؟';
+
+  @override
+  String get traderApplicationLink => 'بطور تاجر درخواست دیں';
+
+  @override
+  String get showPassword => 'پاس ورڈ دکھائیں';
+
+  @override
+  String get hidePassword => 'پاس ورڈ چھپائیں';
+
+  @override
+  String get phoneChangeAction => 'فون کی تصدیق جاری رکھیں';
+
+  @override
+  String get previewNewPassword => 'نئے پاس ورڈ فارم کا پیش منظر';
+
+  @override
+  String get accountCreationUnavailable =>
+      'توثیق سروس منسلک ہونے تک اکاؤنٹ بنانا دستیاب نہیں۔ کوئی اکاؤنٹ نہیں بنایا گیا۔';
+
+  @override
+  String get applicationUnavailable =>
+      'بیک اینڈ منسلک ہونے تک درخواست جمع کرنا دستیاب نہیں۔ کوئی درخواست جمع نہیں ہوئی۔';
+
+  @override
+  String get passwordResetUnavailable =>
+      'توثیق بیک اینڈ منسلک ہونے تک پاس ورڈ ری سیٹ دستیاب نہیں۔ پاس ورڈ تبدیل نہیں ہوا۔';
 }
