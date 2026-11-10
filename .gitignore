@@ -21,3 +21,11 @@ __pycache__/
 .DS_Store
 Thumbs.db
 ml/scrap_forecasting/models/scrap_forecasting_pipeline.joblib
+
+# Flutter generated and local files
+/.dart_tool/
+/build/
+/android/.gradle/
+/android/local.properties
+/.flutter-plugins*
+*.iml

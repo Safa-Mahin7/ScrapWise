@@ -1,0 +1,20 @@
+/// Application-wide constants for ScrapWise.
+class AppConstants {
+  AppConstants._();
+
+  static const String appName = 'ScrapWise';
+  static const String appVersion = '1.0.0';
+
+  // Supported locale tags
+  static const List<String> supportedLocales = ['en', 'hi', 'kn', 'te', 'ur'];
+
+  // SharedPreferences keys
+  static const String prefLocale = 'selected_locale';
+
+  // Route names
+  static const String routeSplash = '/';
+  static const String routeLanguage = '/language';
+  static const String routeLanding = '/landing';
+  static const String routeLogin = '/login';
+  static const String routeRegister = '/register';
+}
