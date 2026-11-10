@@ -1,0 +1,36 @@
+{
+    "dataset": "ml\\scrap_forecasting\\data\\synthetic\\weekly_forecasting_14976.csv",
+    "data_sources": [
+        "synthetic"
+    ],
+    "synthetic_data_warning": true,
+    "target": "next_7_days_confirmed_collection_kg",
+    "target_matches_current_actual_percentage": 100.0,
+    "usable_records": 14400,
+    "training_records": 11520,
+    "testing_records": 2880,
+    "test_start_date": "2026-06-15",
+    "baseline_metrics": {
+        "MAE": 2.1094,
+        "RMSE": 4.6549,
+        "R2": 0.6769
+    },
+    "random_forest_metrics": {
+        "MAE": 1.6193,
+        "RMSE": 3.5941,
+        "R2": 0.8074
+    },
+    "features": [
+        "locality_id",
+        "material_type",
+        "qty_lag_1_week_kg",
+        "qty_lag_2_week_kg",
+        "qty_lag_4_week_kg",
+        "avg_qty_last_4_weeks_kg",
+        "participating_households_last_4_weeks",
+        "days_since_last_collection",
+        "week_sin",
+        "week_cos",
+        "month"
+    ]
+}

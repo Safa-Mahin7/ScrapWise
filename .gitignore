@@ -1,0 +1,23 @@
+# Python virtual environment
+.venv/
+venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Environment variables and secrets
+.env
+.env.*
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Testing and logs
+.pytest_cache/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+ml/scrap_forecasting/models/scrap_forecasting_pipeline.joblib

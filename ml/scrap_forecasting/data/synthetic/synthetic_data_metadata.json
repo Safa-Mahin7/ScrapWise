@@ -1,0 +1,78 @@
+{
+    "project": "ScrapWise",
+    "version": "1.0",
+    "random_seed": 42,
+    "data_classification": "synthetic",
+    "pickup_request_records": 5000,
+    "weekly_records": 14976,
+    "model_ready_feature_rows": 14400,
+    "localities": 12,
+    "materials": 12,
+    "weeks_per_locality_material": 104,
+    "survey_169_responses_included": false,
+    "survey_note": "Keep the original 169 actual survey responses as a separate source. They must not be replaced or falsely labelled as synthetic collection weights.",
+    "coordinate_note": "Coordinates are fictional demo points, not real Ballari household locations.",
+    "forecasting_note": "Synthetic data is for pipeline development and testing, not proof of real-world accuracy.",
+    "generation_assumptions": {
+        "newspaper": [
+            0.62,
+            0.55,
+            0.12
+        ],
+        "old_books": [
+            0.25,
+            0.3,
+            0.1
+        ],
+        "cardboard": [
+            0.48,
+            0.45,
+            0.13
+        ],
+        "PET_plastic": [
+            0.42,
+            0.14,
+            0.1
+        ],
+        "mixed_plastic": [
+            0.32,
+            0.16,
+            0.12
+        ],
+        "iron": [
+            0.15,
+            0.28,
+            0.08
+        ],
+        "steel": [
+            0.12,
+            0.2,
+            0.08
+        ],
+        "aluminium": [
+            0.08,
+            0.05,
+            0.08
+        ],
+        "copper": [
+            0.04,
+            0.015,
+            0.08
+        ],
+        "glass": [
+            0.15,
+            0.18,
+            0.1
+        ],
+        "clothes": [
+            0.25,
+            0.2,
+            0.15
+        ],
+        "other": [
+            0.1,
+            0.08,
+            0.1
+        ]
+    }
+}

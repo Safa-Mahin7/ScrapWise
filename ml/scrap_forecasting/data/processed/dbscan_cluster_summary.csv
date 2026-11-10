@@ -1,0 +1,4 @@
+cluster_id,locality_id,preferred_date,preferred_time_slot,request_ids,number_of_requests,centre_latitude,centre_longitude
+DEMO_AREA_A_20261110_morning_C1,DEMO_AREA_A,2026-11-10,morning,R001;R002;R003,3,15.100499999999998,76.9004
+DEMO_AREA_A_20261110_morning_C2,DEMO_AREA_A,2026-11-10,morning,R004;R005,2,15.13025,76.93020000000001
+DEMO_AREA_B_20261110_morning_C1,DEMO_AREA_B,2026-11-10,morning,R006;R007,2,15.200199999999999,76.95015000000001

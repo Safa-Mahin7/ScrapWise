@@ -1,0 +1,9 @@
+request_id,locality_id,preferred_date,preferred_time_slot,latitude,longitude,cluster_id,cluster_status
+R008,DEMO_AREA_A,2026-11-10,evening,15.102,76.901,,noise
+R001,DEMO_AREA_A,2026-11-10,morning,15.1,76.9,DEMO_AREA_A_20261110_morning_C1,clustered
+R002,DEMO_AREA_A,2026-11-10,morning,15.1005,76.9004,DEMO_AREA_A_20261110_morning_C1,clustered
+R003,DEMO_AREA_A,2026-11-10,morning,15.101,76.9008,DEMO_AREA_A_20261110_morning_C1,clustered
+R004,DEMO_AREA_A,2026-11-10,morning,15.13,76.93,DEMO_AREA_A_20261110_morning_C2,clustered
+R005,DEMO_AREA_A,2026-11-10,morning,15.1305,76.9304,DEMO_AREA_A_20261110_morning_C2,clustered
+R006,DEMO_AREA_B,2026-11-10,morning,15.2,76.95,DEMO_AREA_B_20261110_morning_C1,clustered
+R007,DEMO_AREA_B,2026-11-10,morning,15.2004,76.9503,DEMO_AREA_B_20261110_morning_C1,clustered

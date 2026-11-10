@@ -1,0 +1,10 @@
+
+request_id,locality_id,latitude,longitude,preferred_date,preferred_time_slot,requested_materials,status
+R001,DEMO_AREA_A,15.1000,76.9000,2026-11-10,morning,newspaper;cardboard,pending
+R002,DEMO_AREA_A,15.1005,76.9004,2026-11-10,morning,newspaper,pending
+R003,DEMO_AREA_A,15.1010,76.9008,2026-11-10,morning,plastic;cardboard,pending
+R004,DEMO_AREA_A,15.1300,76.9300,2026-11-10,morning,newspaper,pending
+R005,DEMO_AREA_A,15.1305,76.9304,2026-11-10,morning,iron,pending
+R006,DEMO_AREA_B,15.2000,76.9500,2026-11-10,morning,plastic,pending
+R007,DEMO_AREA_B,15.2004,76.9503,2026-11-10,morning,cardboard,pending
+R008,DEMO_AREA_A,15.1020,76.9010,2026-11-10,evening,newspaper,pending
