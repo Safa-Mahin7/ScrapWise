@@ -1,0 +1,2 @@
+# Tests only; runtime uses the team's existing requirements.txt
+pytest>=8,<10
