@@ -13,6 +13,10 @@ import 'package:scrapwise/features/onboarding/screens/language_selection_screen.
 import 'package:scrapwise/features/onboarding/screens/splash_screen.dart';
 import 'package:scrapwise/l10n/app_localizations.dart';
 
+import 'package:scrapwise/features/auth/services/auth_service.dart';
+import 'package:scrapwise/features/auth/services/session_controller.dart';
+import 'package:scrapwise/features/auth/services/session_store.dart';
+
 Widget _testScreen(Widget screen) {
   return ProviderScope(
     child: MaterialApp(
@@ -27,6 +31,17 @@ Widget _testScreen(Widget screen) {
       home: screen,
     ),
   );
+}
+
+class _MemorySessionStore extends SessionStore {
+  @override
+  Future<void> save(String token) async {}
+
+  @override
+  Future<String?> read() async => null;
+
+  @override
+  Future<void> clear() async {}
 }
 
 void main() {
@@ -158,6 +173,16 @@ void main() {
       'login handles invalid credentials from API',
       (tester) async {
         final dio = ApiClient.instance.dio;
+
+        final testSession = SessionController(
+          authService: AuthService(
+            dio: dio,
+            sessionStore: _MemorySessionStore(),
+          ),
+        );
+
+        addTearDown(testSession.dispose);
+
         final requests = <Map<String, dynamic>>[];
 
         // Mock the authentication endpoint.
@@ -207,7 +232,9 @@ void main() {
         });
 
         await tester.pumpWidget(
-          _testScreen(const LoginScreen()),
+          _testScreen(
+            LoginScreen(sessionController: testSession),
+          ),
         );
 
         await tester.pump();

@@ -8,13 +8,18 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/sw_button.dart';
 import '../../../core/widgets/sw_text_field.dart';
 import '../../../l10n/app_localizations.dart';
-import '../services/auth_service.dart';
+import '../services/session_controller.dart';
 import '../widgets/auth_components.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key, this.isLoading = false});
+  const LoginScreen({
+    super.key,
+    this.isLoading = false,
+    this.sessionController,
+  });
 
   final bool isLoading;
+  final SessionController? sessionController;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -26,7 +31,13 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   final _passwordFocus = FocusNode();
 
-  final _authService = AuthService();
+  late final SessionController _session;
+
+  @override
+  void initState() {
+    super.initState();
+    _session = widget.sessionController ?? SessionController.instance;
+  }
 
   String? _errorMessage;
   bool _isSubmitting = false;
@@ -52,44 +63,20 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      // Step 1: Authenticate with FastAPI.
-      final user = await _authService.login(
+      // Login and verify identity via the protected /api/auth/me endpoint.
+      final verifiedUser = await _session.signIn(
         mobile: _mobileController.text.trim(),
         password: _passwordController.text,
       );
 
-      // Step 2: Use the login token to access the
-      // protected /api/auth/me endpoint.
-      final verifiedUser = await _authService.currentUser();
-
-      // Step 3: Verify the returned user details.
-      if (verifiedUser['role'] != user['role'] ||
-          verifiedUser['user_id'] != user['user_id']) {
-        throw StateError('Authenticated user details mismatch');
-      }
-
       if (!mounted) return;
-
-      // Temporary success dialog until role dashboards
-      // are connected.
-      await showDialog<void>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: const Text('Login successful'),
-          content: Text(
-            'Authenticated as ${verifiedUser['role'] ?? 'user'}. '
-            'The role dashboard will be connected next.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
+      final dashboard =
+          SessionController.dashboardForRole(verifiedUser['role']);
+      if (dashboard == null) {
+        throw StateError('Unsupported account role');
+      }
+      // The router also redirects automatically when the session changes.
+      context.go(dashboard);
     } on DioException catch (error) {
       if (!mounted) return;
 

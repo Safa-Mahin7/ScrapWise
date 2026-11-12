@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../auth/services/session_controller.dart';
 
 /// ScrapWise splash screen.
 /// Displays branding for 2.5 s, then navigates to language selection
@@ -21,6 +22,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
+  bool _sessionError = false;
+  bool _restoring = false;
 
   @override
   void initState() {
@@ -40,16 +43,38 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     _navigate();
   }
 
-  Future<void> _navigate() async {
-    await Future.delayed(const Duration(milliseconds: 2500));
-    if (!mounted) return;
-    final prefs = await SharedPreferences.getInstance();
-    final savedLocale = prefs.getString(AppConstants.prefLocale);
-    if (!mounted) return;
-    if (savedLocale == null) {
-      GoRouter.maybeOf(context)?.go(AppConstants.routeLanguage);
-    } else {
-      GoRouter.maybeOf(context)?.go(AppConstants.routeLanding);
+  Future<void> _navigate({bool showSplash = true}) async {
+    if (_restoring) return;
+    _restoring = true;
+    if (_sessionError && mounted) setState(() => _sessionError = false);
+    try {
+      if (showSplash) {
+        await Future.delayed(const Duration(milliseconds: 2500));
+      }
+      if (!mounted) return;
+
+      // Verify a saved bearer token with FastAPI before trusting its role.
+      await SessionController.instance.restoreSession();
+      if (!mounted) return;
+
+      final session = SessionController.instance;
+      if (session.isAuthenticated && session.dashboardPath != null) {
+        GoRouter.maybeOf(context)?.go(session.dashboardPath!);
+        return;
+      }
+
+      final prefs = await SharedPreferences.getInstance();
+      if (!mounted) return;
+      final savedLocale = prefs.getString(AppConstants.prefLocale);
+      GoRouter.maybeOf(context)?.go(
+        savedLocale == null
+            ? AppConstants.routeLanguage
+            : AppConstants.routeLanding,
+      );
+    } catch (_) {
+      if (mounted) setState(() => _sessionError = true);
+    } finally {
+      _restoring = false;
     }
   }
 
@@ -119,12 +144,27 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       width: 48,
                       height: 4,
                       child: LinearProgressIndicator(
-                        backgroundColor:
-                            Colors.white.withValues(alpha: 0.2),
+                        backgroundColor: Colors.white.withValues(alpha: 0.2),
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
+                    if (_sessionError) ...[
+                      const SizedBox(height: 20),
+                      const Text(
+                        'Could not verify a saved session. Check your '
+                        'connection and retry.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      TextButton(
+                        onPressed: () => _navigate(showSplash: false),
+                        child: const Text(
+                          'Retry',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

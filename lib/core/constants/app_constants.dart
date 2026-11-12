@@ -24,4 +24,9 @@ class AppConstants {
   static const String routeTraderApplication = '/trader-application';
   static const String routeTraderApplicationStatus =
       '/trader-application/status';
+  // Protected role landing routes.
+  static const String routeHouseholdDashboard = '/dashboard/household';
+  static const String routeCollectorDashboard = '/dashboard/collector';
+  static const String routeTraderDashboard = '/dashboard/trader';
+  static const String routeAdminDashboard = '/dashboard/admin';
 }

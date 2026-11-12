@@ -1,8 +1,17 @@
 import 'package:dio/dio.dart';
+
 import '../../../core/network/api_client.dart';
+import 'session_store.dart';
 
 class AuthService {
-  final Dio _dio = ApiClient.instance.dio;
+  AuthService({
+    Dio? dio,
+    SessionStore? sessionStore,
+  })  : _dio = dio ?? ApiClient.instance.dio,
+        _sessionStore = sessionStore ?? SessionStore();
+
+  final Dio _dio;
+  final SessionStore _sessionStore;
 
   // Household registration
   Future<void> registerHousehold({
@@ -22,7 +31,7 @@ class AuthService {
     );
   }
 
-  // Verify OTP
+  // Registration OTP verification
   Future<void> verifyOtp({
     required String mobile,
     required String purpose,
@@ -50,7 +59,7 @@ class AuthService {
     );
   }
 
-  // Login
+  // Authenticate and save session token
   Future<Map<String, dynamic>> login({
     required String mobile,
     required String password,
@@ -65,17 +74,29 @@ class AuthService {
 
     final data = response.data;
     final token = data?['access_token'];
+    final user = data?['user'];
 
     if (token is! String || token.isEmpty) {
-      throw StateError('Login response contains no access token');
+      throw StateError(
+        'Login response contains no access token',
+      );
     }
+
+    if (user is! Map) {
+      throw StateError(
+        'Login response contains no valid user',
+      );
+    }
+
+    // Save the token before marking this client authenticated.
+    await _sessionStore.save(token);
 
     _dio.options.headers['Authorization'] = 'Bearer $token';
 
-    return Map<String, dynamic>.from(data!['user'] as Map);
+    return Map<String, dynamic>.from(user);
   }
 
-  // Get current authenticated user
+  // Validate the active session with FastAPI
   Future<Map<String, dynamic>> currentUser() async {
     final response = await _dio.get<Map<String, dynamic>>(
       '/api/auth/me',
@@ -84,12 +105,49 @@ class AuthService {
     return response.data ?? <String, dynamic>{};
   }
 
-  // Logout
+  // Restore a previously saved session.
+  // The server must validate the token before we trust it.
+  Future<Map<String, dynamic>?> restoreSession() async {
+    final token = await _sessionStore.read();
+
+    if (token == null || token.isEmpty) {
+      _dio.options.headers.remove('Authorization');
+      return null;
+    }
+
+    _dio.options.headers['Authorization'] = 'Bearer $token';
+
+    try {
+      return await currentUser();
+    } on DioException catch (error) {
+      final statusCode = error.response?.statusCode;
+
+      // Invalid, expired, or inactive session.
+      if (statusCode == 401 || statusCode == 403) {
+        await clearLocalSession();
+        return null;
+      }
+
+      // A network outage is not proof that the token expired.
+      // Preserve it and let the caller handle the connection error.
+      rethrow;
+    }
+  }
+
+  // Clear the locally saved session
+  Future<void> clearLocalSession() async {
+    _dio.options.headers.remove('Authorization');
+    await _sessionStore.clear();
+  }
+
+  // Revoke the server session and remove local credentials
   Future<void> logout() async {
     try {
-      await _dio.post('/api/auth/logout');
+      if (_dio.options.headers.containsKey('Authorization')) {
+        await _dio.post('/api/auth/logout');
+      }
     } finally {
-      _dio.options.headers.remove('Authorization');
+      await clearLocalSession();
     }
   }
 }
