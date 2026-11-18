@@ -13,6 +13,7 @@ import '../features/auth/screens/collector_invitation_screen.dart';
 import '../features/auth/screens/trader_application_screen.dart';
 import '../features/auth/screens/trader_application_status_screen.dart';
 import '../features/auth/screens/role_dashboard_screen.dart';
+import '../features/household/screens/household_dashboard_screen.dart';
 import '../features/auth/services/session_controller.dart';
 
 /// Route guards depend on server-verified session state, not a role choice.
@@ -144,8 +145,7 @@ GoRouter createAppRouter({
       GoRoute(
         path: AppConstants.routeHouseholdDashboard,
         name: 'household-dashboard',
-        builder: (context, state) =>
-            const RoleDashboardScreen(role: 'household'),
+        builder: (context, state) => const HouseholdDashboardScreen(),
       ),
       GoRoute(
         path: AppConstants.routeCollectorDashboard,
