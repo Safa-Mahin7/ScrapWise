@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,6 +10,7 @@ import '../../../core/widgets/sw_button.dart';
 import '../../../core/widgets/sw_text_field.dart';
 import '../../../l10n/app_localizations.dart';
 import '../services/auth_service.dart';
+import '../services/session_controller.dart';
 import '../widgets/auth_components.dart';
 
 enum OtpPurpose {
@@ -42,22 +45,31 @@ class OtpVerificationScreen extends StatefulWidget {
     super.key,
     required this.purpose,
     this.phoneNumber,
+    this.authService,
+    this.sessionController,
   });
 
   final OtpPurpose purpose;
   final String? phoneNumber;
+  final AuthService? authService;
+  final SessionController? sessionController;
 
   @override
   State<OtpVerificationScreen> createState() => _OtpVerificationScreenState();
 }
 
 class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
+  static const _resendCooldown = Duration(seconds: 60);
+
   final _formKey = GlobalKey<FormState>();
   final _codeController = TextEditingController();
-  final _authService = AuthService();
+  late final AuthService _authService;
+  late final SessionController _sessionController;
 
   bool _isVerifying = false;
   bool _isResending = false;
+  int _resendCooldownSeconds = 0;
+  Timer? _cooldownTimer;
 
   String? _errorMessage;
   String? _successMessage;
@@ -65,9 +77,50 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   bool get _isRegistration => widget.purpose == OtpPurpose.phoneVerification;
 
   @override
+  void initState() {
+    super.initState();
+    _authService = widget.authService ?? AuthService.shared;
+    _sessionController = widget.sessionController ?? SessionController.instance;
+    _resendCooldownSeconds = _resendCooldown.inSeconds;
+    _cooldownTimer = Timer.periodic(
+      const Duration(seconds: 1),
+      _tickResendCooldown,
+    );
+  }
+
+  @override
   void dispose() {
+    _cooldownTimer?.cancel();
     _codeController.dispose();
     super.dispose();
+  }
+
+  void _startResendCooldown() {
+    _cooldownTimer?.cancel();
+    setState(() {
+      _resendCooldownSeconds = _resendCooldown.inSeconds;
+    });
+    _cooldownTimer = Timer.periodic(
+      const Duration(seconds: 1),
+      _tickResendCooldown,
+    );
+  }
+
+  void _tickResendCooldown(Timer timer) {
+    if (!mounted) {
+      timer.cancel();
+      return;
+    }
+    if (_resendCooldownSeconds <= 1) {
+      timer.cancel();
+      setState(() {
+        _resendCooldownSeconds = 0;
+      });
+      return;
+    }
+    setState(() {
+      _resendCooldownSeconds--;
+    });
   }
 
   Future<void> _verify() async {
@@ -77,20 +130,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       return;
     }
 
-    // Password recovery and mobile change have separate
-    // backend workflows that are not integrated yet.
-    if (!_isRegistration) {
-      setState(() {
-        _errorMessage = 'This verification workflow is not connected yet.';
-      });
-      return;
-    }
-
     final mobile = widget.phoneNumber?.trim();
 
     if (mobile == null || mobile.isEmpty) {
       setState(() {
-        _errorMessage = 'Mobile number is missing. Please register again.';
+        _errorMessage = AppLocalizations.of(context).mobileMissing;
       });
       return;
     }
@@ -102,18 +146,50 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     });
 
     try {
-      await _authService.verifyOtp(
-        mobile: mobile,
-        purpose: 'registration',
-        code: _codeController.text.trim(),
-      );
+      final code = _codeController.text.trim();
+      switch (widget.purpose) {
+        case OtpPurpose.phoneVerification:
+          await _authService.verifyOtp(
+            mobile: mobile,
+            purpose: 'registration',
+            code: code,
+          );
+          break;
+        case OtpPurpose.passwordRecovery:
+          final resetToken = await _authService.verifyPasswordRecoveryOtp(
+            mobile: mobile,
+            code: code,
+          );
+          if (!mounted) return;
+          context.go(
+            AppConstants.routeNewPassword,
+            extra: {'mobile': mobile, 'reset_token': resetToken},
+          );
+          return;
+        case OtpPurpose.phoneChange:
+          await _authService.confirmMobileChange(
+            newMobile: mobile,
+            code: code,
+          );
+          await _sessionController.expireLocalSession();
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                AppLocalizations.of(context).mobileChangeSuccess,
+              ),
+            ),
+          );
+          context.go(AppConstants.routeLogin);
+          return;
+      }
 
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Mobile number verified successfully. Please sign in.',
+            AppLocalizations.of(context).mobileVerified,
           ),
         ),
       );
@@ -122,39 +198,54 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     } on DioException catch (error) {
       if (!mounted) return;
 
+      final l10n = AppLocalizations.of(context);
       String message;
 
       switch (error.response?.statusCode) {
         case 400:
-          message = 'Invalid, expired, or already used verification code.';
+          message = l10n.otpInvalid;
           break;
 
         case 409:
-          message = 'Account status changed. Please try again.';
+          message = widget.purpose == OtpPurpose.phoneChange
+              ? l10n.mobileChangeConflict
+              : l10n.accountStatusChanged;
           break;
 
         case 429:
-          message = 'Too many attempts. Please try again later.';
+          message = l10n.otpRateLimited;
           break;
 
         case 503:
-          message = 'Verification service is temporarily unavailable.';
+          message = l10n.smsDeliveryUnavailable;
           break;
 
         default:
           message = error.response == null
-              ? 'Cannot connect to FastAPI. Check your server.'
-              : 'Verification failed. Please try again.';
+              ? l10n.authNetworkUnavailable
+              : l10n.verificationFailed;
+      }
+
+      if (widget.purpose == OtpPurpose.phoneChange &&
+          error.response?.statusCode == 401) {
+        await _sessionController.expireLocalSession();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.sessionExpired)),
+        );
+        context.go(AppConstants.routeLogin);
+        return;
       }
 
       setState(() {
         _errorMessage = message;
+        _successMessage = null;
       });
     } catch (_) {
       if (!mounted) return;
 
       setState(() {
-        _errorMessage = 'An unexpected verification error occurred.';
+        _errorMessage = AppLocalizations.of(context).errorGeneric;
       });
     } finally {
       if (mounted) {
@@ -166,20 +257,13 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   }
 
   Future<void> _resend() async {
-    if (_isResending || _isVerifying) return;
-
-    if (!_isRegistration) {
-      setState(() {
-        _errorMessage = 'Resending is not connected for this workflow yet.';
-      });
-      return;
-    }
+    if (_isResending || _isVerifying || _resendCooldownSeconds > 0) return;
 
     final mobile = widget.phoneNumber?.trim();
 
     if (mobile == null || mobile.isEmpty) {
       setState(() {
-        _errorMessage = 'Mobile number is missing. Please register again.';
+        _errorMessage = AppLocalizations.of(context).mobileMissing;
       });
       return;
     }
@@ -191,29 +275,44 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     });
 
     try {
-      await _authService.resendOtp(mobile: mobile);
+      switch (widget.purpose) {
+        case OtpPurpose.phoneVerification:
+          await _authService.resendOtp(mobile: mobile);
+          break;
+        case OtpPurpose.passwordRecovery:
+          await _authService.requestPasswordReset(mobile: mobile);
+          break;
+        case OtpPurpose.phoneChange:
+          await _authService.resendMobileChange();
+          break;
+      }
 
       if (!mounted) return;
 
       setState(() {
-        _successMessage =
-            'If eligible, a new verification code has been requested.';
+        _successMessage = AppLocalizations.of(context).otpRequestAccepted;
       });
+      _startResendCooldown();
     } on DioException catch (error) {
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
 
       setState(() {
         _errorMessage = switch (error.response?.statusCode) {
-          429 => 'Please wait before requesting another code.',
-          503 => 'OTP delivery is currently unavailable.',
-          _ => 'Could not request a new code. Please try again.',
+          429 => l10n.otpRateLimited,
+          503 => l10n.smsDeliveryUnavailable,
+          401 when widget.purpose == OtpPurpose.phoneChange =>
+            l10n.sessionExpired,
+          _ => error.response == null
+              ? l10n.authNetworkUnavailable
+              : l10n.verificationFailed,
         };
       });
     } catch (_) {
       if (!mounted) return;
 
       setState(() {
-        _errorMessage = 'An unexpected error occurred.';
+        _errorMessage = AppLocalizations.of(context).errorGeneric;
       });
     } finally {
       if (mounted) {
@@ -229,8 +328,14 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     final l10n = AppLocalizations.of(context);
 
     final isRecovery = widget.purpose == OtpPurpose.passwordRecovery;
+    final isPhoneChange = widget.purpose == OtpPurpose.phoneChange;
 
     final isBusy = _isVerifying || _isResending;
+    final resendLabel = _isResending
+        ? l10n.requestingCode
+        : _resendCooldownSeconds > 0
+            ? l10n.resendCodeCountdown(_resendCooldownSeconds)
+            : l10n.resendCode;
 
     return AuthScreenShell(
       title: widget.purpose.title(l10n),
@@ -240,7 +345,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         OtpPurpose.phoneVerification => l10n.otpCodeHint,
       },
       onBack: () => context.go(
-        isRecovery ? AppConstants.routeForgotPassword : AppConstants.routeLogin,
+        isRecovery
+            ? AppConstants.routeForgotPassword
+            : isPhoneChange
+                ? AppConstants.routeChangeMobile
+                : AppConstants.routeLogin,
       ),
       child: Form(
         key: _formKey,
@@ -254,10 +363,16 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               ),
               const SizedBox(height: 16),
             ],
-            if (!_isRegistration) ...[
-              const AuthNotice(
-                message: 'This verification workflow is not integrated yet.',
-              ),
+            if (isRecovery) ...[
+              AuthNotice(message: l10n.recoveryDeliveryNotice),
+              const SizedBox(height: 20),
+            ],
+            if (isPhoneChange) ...[
+              AuthNotice(message: l10n.changeMobileHelp),
+              const SizedBox(height: 20),
+            ],
+            if (_isRegistration) ...[
+              AuthNotice(message: l10n.otpRequestAccepted),
               const SizedBox(height: 20),
             ],
             SwTextField(
@@ -297,10 +412,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               isLoading: _isVerifying,
             ),
             TextButton(
-              onPressed: isBusy ? null : _resend,
-              child: Text(
-                _isResending ? 'Requesting code...' : l10n.resendCode,
-              ),
+              onPressed: isBusy || _resendCooldownSeconds > 0 ? null : _resend,
+              child: Text(resendLabel),
             ),
           ],
         ),

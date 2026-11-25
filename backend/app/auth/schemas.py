@@ -1,7 +1,7 @@
 """Request/response contracts. The client never supplies its own account role."""
 import re
 from typing import Literal
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 def normalize_mobile(value: str) -> str:
@@ -41,6 +41,20 @@ class LoginRequest(MobileRequest):
     password: str = Field(min_length=1, max_length=128)
 
 
+class GoogleTokenRequest(BaseModel):
+    id_token: str = Field(min_length=20, max_length=8192)
+
+
+class GoogleHouseholdRegistration(MobileRequest):
+    id_token: str = Field(min_length=20, max_length=8192)
+    full_name: str = Field(min_length=2, max_length=120)
+    locality_id: str = Field(min_length=1, max_length=100)
+
+
+class GoogleLinkRequest(GoogleTokenRequest):
+    password: str = Field(min_length=1, max_length=128)
+
+
 class VerifyOtp(MobileRequest):
     purpose: Literal['registration', 'password_reset']
     code: str = Field(pattern=r'^\d{6}$')
@@ -53,6 +67,14 @@ class ResendOtp(MobileRequest):
 class PasswordReset(MobileRequest):
     reset_token: str = Field(min_length=20)
     new_password: str = Field(min_length=10, max_length=128)
+
+
+class RefreshRequest(BaseModel):
+    refresh_token: str = Field(min_length=20, max_length=256)
+
+
+class LogoutRequest(BaseModel):
+    refresh_token: str | None = Field(default=None, min_length=20, max_length=256)
 
 
 class InviteCollector(MobileRequest):
@@ -68,7 +90,7 @@ class CollectorActivation(InvitationOtpRequest):
     password: str = Field(min_length=10, max_length=128)
 
 
-class ChangeMobileRequest(BaseModel):
+class NewMobileRequest(BaseModel):
     new_mobile: str
 
     @field_validator('new_mobile')
@@ -77,7 +99,18 @@ class ChangeMobileRequest(BaseModel):
         return normalize_mobile(value)
 
 
-class ChangeMobileConfirm(ChangeMobileRequest):
+class ChangeMobileRequest(NewMobileRequest):
+    current_password: str | None = Field(default=None, min_length=1, max_length=128)
+    google_id_token: str | None = Field(default=None, min_length=20, max_length=8192)
+
+    @model_validator(mode='after')
+    def requires_one_reauthentication_method(self):
+        if (self.current_password is None) == (self.google_id_token is None):
+            raise ValueError('Provide exactly one reauthentication method')
+        return self
+
+
+class ChangeMobileConfirm(NewMobileRequest):
     code: str = Field(pattern=r'^\d{6}$')
 
 
@@ -92,6 +125,8 @@ class UserResponse(BaseModel):
 
 class LoginResponse(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str = 'bearer'
     expires_in: int = 3600
+    refresh_expires_in: int = 30 * 24 * 3600
     user: UserResponse

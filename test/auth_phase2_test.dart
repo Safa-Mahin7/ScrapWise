@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -6,11 +7,48 @@ import 'package:go_router/go_router.dart';
 import 'package:scrapwise/app/router.dart';
 import 'package:scrapwise/core/theme/app_theme.dart';
 import 'package:scrapwise/features/auth/screens/change_mobile_screen.dart';
+import 'package:scrapwise/features/auth/screens/forgot_password_screen.dart';
 import 'package:scrapwise/features/auth/screens/login_screen.dart';
+import 'package:scrapwise/features/auth/screens/otp_verification_screen.dart';
 import 'package:scrapwise/features/auth/screens/register_screen.dart';
 import 'package:scrapwise/features/auth/screens/trader_application_screen.dart';
+import 'package:scrapwise/features/auth/services/auth_service.dart';
+import 'package:scrapwise/features/auth/services/session_controller.dart';
 import 'package:scrapwise/features/onboarding/screens/landing_screen.dart';
 import 'package:scrapwise/l10n/app_localizations.dart';
+
+class _RecoveryAuthService extends AuthService {
+  String? requestedMobile;
+  String? resetMobile;
+  String? resetPasswordValue;
+  DioException? requestError;
+
+  @override
+  Future<void> requestPasswordReset({required String mobile}) async {
+    if (requestError != null) throw requestError!;
+    requestedMobile = mobile;
+  }
+
+  @override
+  Future<String> verifyPasswordRecoveryOtp({
+    required String mobile,
+    required String code,
+  }) async =>
+      'mock-reset-grant';
+
+  @override
+  Future<void> resetPassword({
+    required String mobile,
+    required String resetToken,
+    required String newPassword,
+  }) async {
+    resetMobile = mobile;
+    resetPasswordValue = newPassword;
+  }
+
+  @override
+  Future<void> clearLocalSession() async {}
+}
 
 Widget _wrap(Widget screen) => MaterialApp(
       theme: AppTheme.light,
@@ -170,14 +208,49 @@ void main() {
   );
 
   testWidgets(
-    'password recovery OTP remains unavailable without integration',
+    'registration OTP resend stays disabled during the cooldown',
+    (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          const OtpVerificationScreen(
+            purpose: OtpPurpose.phoneVerification,
+            phoneNumber: '9876543210',
+          ),
+        ),
+      );
+
+      expect(find.text('Resend in 60s'), findsOneWidget);
+      expect(
+        tester.widget<TextButton>(find.byType(TextButton)).onPressed,
+        isNull,
+      );
+
+      await tester.pump(const Duration(seconds: 59));
+      expect(find.text('Resend in 1s'), findsOneWidget);
+
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.text('Resend code'), findsOneWidget);
+      expect(
+        tester.widget<TextButton>(find.byType(TextButton)).onPressed,
+        isNotNull,
+      );
+    },
+  );
+
+  testWidgets(
+    'password recovery verifies OTP and submits a reset grant',
     (tester) async {
       tester.view.physicalSize = const Size(800, 1200);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
 
+      final authService = _RecoveryAuthService();
+      final session = SessionController(authService: authService);
+      addTearDown(session.dispose);
       final router = createAppRouter(
         initialLocation: '/forgot-password',
+        authService: authService,
+        sessionController: session,
       );
 
       addTearDown(router.dispose);
@@ -190,52 +263,72 @@ void main() {
         '9876543210',
       );
 
-      // Navigate to password recovery OTP screen.
+      // The recovery endpoint returns a generic response before OTP entry.
       await tester.tap(find.text('Continue'));
       await tester.pumpAndSettle();
+      expect(authService.requestedMobile, '9876543210');
 
       expect(
         find.text('Reset your password'),
         findsOneWidget,
       );
 
-      // Recovery OTP is not integrated yet.
-      expect(
-        find.text(
-          'This verification workflow is not integrated yet.',
-        ),
-        findsOneWidget,
-      );
-
-      // Enter a six-digit OTP.
+      // A test-controlled OTP response returns a single-use reset grant.
       await tester.enterText(
         find.byType(TextFormField).last,
         '123456',
       );
 
       await tester.tap(find.text('Verify code'));
-      await tester.pump();
+      await tester.pumpAndSettle();
+      expect(find.text('Create a new password'), findsNWidgets(2));
 
-      // Unsupported recovery verification must fail closed.
-      expect(
-        find.text(
-          'This verification workflow is not connected yet.',
-        ),
-        findsOneWidget,
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'New Password'),
+        'FreshPassword123!',
       );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Confirm New Password'),
+        'FreshPassword123!',
+      );
+      await tester.tap(find.text('Create a new password').last);
+      await tester.pumpAndSettle();
 
-      // The app must not claim verification succeeded.
-      expect(
-        find.text('Mobile number verified successfully.'),
-        findsNothing,
-      );
-
-      expect(
-        find.text('Login successful'),
-        findsNothing,
-      );
+      expect(authService.resetMobile, '9876543210');
+      expect(authService.resetPasswordValue, 'FreshPassword123!');
+      expect(find.text('Password changed. Sign in with your new password.'),
+          findsOneWidget);
     },
   );
+
+  testWidgets('password recovery reports provider rejection without navigating',
+      (tester) async {
+    final service = _RecoveryAuthService()
+      ..requestError = DioException(
+        requestOptions: RequestOptions(path: '/api/auth/password/forgot'),
+        response: Response(
+          requestOptions: RequestOptions(path: '/api/auth/password/forgot'),
+          statusCode: 503,
+        ),
+        type: DioExceptionType.badResponse,
+      );
+    await tester.pumpWidget(_wrap(
+      ForgotPasswordScreen(authService: service),
+    ));
+
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Mobile Number'),
+      '9876543210',
+    );
+    await tester.tap(find.text('Continue'));
+    await tester.pumpAndSettle();
+
+    expect(
+        find.text('The SMS service is temporarily unavailable. '
+            'No verification code was sent.'),
+        findsOneWidget);
+    expect(find.byType(OtpVerificationScreen), findsNothing);
+  });
 
   testWidgets(
     'trader application does not grant access or claim submission',
@@ -280,7 +373,7 @@ void main() {
       );
 
       expect(
-        find.textContaining('signed-in users'),
+        find.text('Continue with Google'),
         findsOneWidget,
       );
     },

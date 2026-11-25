@@ -17,6 +17,8 @@ class AppConstants {
   static const String routeLanding = '/landing';
   static const String routeLogin = '/login';
   static const String routeRegister = '/register';
+  static const String routeLinkGoogle = '/link-google';
+  static const String routeChangeMobile = '/account/change-mobile';
   static const String routeForgotPassword = '/forgot-password';
   static const String routeOtpVerification = '/otp/:purpose';
   static const String routeNewPassword = '/new-password';

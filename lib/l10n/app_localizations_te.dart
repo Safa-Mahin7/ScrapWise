@@ -135,7 +135,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get passwordRequired => 'దయచేసి పాస్‌వర్డ్ నమోదు చేయండి';
 
   @override
-  String get passwordTooShort => 'పాస్‌వర్డ్ కనీసం 6 అక్షరాలు ఉండాలి';
+  String get passwordTooShort => 'పాస్‌వర్డ్ కనీసం 10 అక్షరాలు ఉండాలి';
 
   @override
   String get confirmPasswordRequired => 'దయచేసి పాస్‌వర్డ్ నిర్ధారించండి';
@@ -152,7 +152,11 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get forgotPasswordHelp =>
-      'మీ ఖాతా మొబైల్ నంబర్ నమోదు చేయండి. కోడ్ పంపడం ఇంకా అందుబాటులో లేదు.';
+      'మీ ఖాతా మొబైల్ నంబర్ నమోదు చేయండి. పాస్‌వర్డ్ ఉన్న ఖాతాకు ధృవీకరణ కోడ్ పంపబడుతుంది. Google మాత్రమే ఉపయోగించే ఖాతాకు Googleతో సైన్ ఇన్ చేయండి.';
+
+  @override
+  String get recoveryDeliveryNotice =>
+      'గోప్యత కోసం ఈ సందేశం అన్ని నంబర్లకు ఒకేలా ఉంటుంది. కోడ్ రాకపోతే Google ఖాతాతో Google ద్వారా సైన్ ఇన్ చేయండి.';
 
   @override
   String get sendCode => 'కొనసాగించు';
@@ -188,7 +192,7 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get newPasswordHelp =>
-      'ఇది UI నమూనా మాత్రమే. పాస్‌వర్డ్ రీసెట్‌కు ధృవీకరించిన రికవరీ సెషన్ అవసరం.';
+      'కనీసం 10 అక్షరాల కొత్త పాస్‌వర్డ్‌ను ఎంచుకోండి. మీ ఇతర సెషన్‌లు సైన్ అవుట్ అవుతాయి.';
 
   @override
   String get newPassword => 'కొత్త పాస్‌వర్డ్';
@@ -201,7 +205,7 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get changeMobileHelp =>
-      'ప్రామాణీకరణ అనుసంధానం తర్వాత సైన్ ఇన్ చేసిన వినియోగదారులకు ఈ ఖాతా ఎంపిక అందుబాటులో ఉంటుంది.';
+      'ప్రస్తుత పాస్‌వర్డ్ లేదా Googleతో మీ గుర్తింపును నిర్ధారించి, కొత్త నంబర్‌ను SMS ద్వారా ధృవీకరించండి. తర్వాత మళ్లీ సైన్ ఇన్ చేయాలి.';
 
   @override
   String get currentMobile => 'ప్రస్తుత మొబైల్ నంబర్';
@@ -272,7 +276,37 @@ class AppLocalizationsTe extends AppLocalizations {
   String get hidePassword => 'పాస్‌వర్డ్ దాచు';
 
   @override
-  String get phoneChangeAction => 'ఫోన్ ధృవీకరణకు కొనసాగించండి';
+  String get phoneChangeAction => 'ధృవీకరణ కోడ్ పంపండి';
+
+  @override
+  String get accountSettings => 'ఖాతా సెట్టింగ్‌లు';
+
+  @override
+  String get changeMobileAction => 'మొబైల్ నంబర్ మార్చండి';
+
+  @override
+  String get mobileChangeReauth =>
+      'మీ గుర్తింపును నిర్ధారించడానికి పాస్‌వర్డ్ మళ్లీ నమోదు చేయండి లేదా Googleతో కొనసాగండి.';
+
+  @override
+  String get mobileChangeConflict =>
+      'ఈ నంబర్ ఇప్పటికే ఉపయోగంలో ఉంది లేదా మరో మొబైల్ మార్పు పెండింగ్‌లో ఉంది.';
+
+  @override
+  String get mobileChangeSuccess =>
+      'మొబైల్ నంబర్ మార్చబడింది. కొత్త నంబర్‌తో మళ్లీ సైన్ ఇన్ చేయండి.';
+
+  @override
+  String get passwordResetSuccess =>
+      'పాస్‌వర్డ్ మార్చబడింది. కొత్త పాస్‌వర్డ్‌తో సైన్ ఇన్ చేయండి.';
+
+  @override
+  String get sessionExpired =>
+      'మీ సెషన్ గడువు ముగిసింది. కొనసాగించడానికి మళ్లీ సైన్ ఇన్ చేయండి.';
+
+  @override
+  String get smsDeliveryUnavailable =>
+      'SMS సేవ తాత్కాలికంగా అందుబాటులో లేదు. ధృవీకరణ కోడ్ పంపబడలేదు.';
 
   @override
   String get previewNewPassword => 'కొత్త పాస్‌వర్డ్ ఫారమ్ ప్రివ్యూ';
@@ -287,5 +321,146 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get passwordResetUnavailable =>
-      'ప్రామాణీకరణ బ్యాకెండ్ అనుసంధానించే వరకు పాస్‌వర్డ్ రీసెట్ అందుబాటులో లేదు. పాస్‌వర్డ్ మార్చబడలేదు.';
+      'పాస్‌వర్డ్ రీసెట్ కాలేదు. కొత్త ధృవీకరణ కోడ్‌ను అభ్యర్థించి మళ్లీ ప్రయత్నించండి.';
+
+  @override
+  String get mobileAlreadyRegistered =>
+      'ఈ మొబైల్ నంబర్ ఇప్పటికే నమోదు చేయబడింది.';
+
+  @override
+  String get registrationDetailsInvalid =>
+      'మీ వివరాలను తనిఖీ చేసి మళ్లీ ప్రయత్నించండి.';
+
+  @override
+  String get smsUnavailable =>
+      'SMS ధృవీకరణ తాత్కాలికంగా అందుబాటులో లేదు. ఖాతా సక్రియం కాలేదు. తర్వాత మళ్లీ ప్రయత్నించండి.';
+
+  @override
+  String get authNetworkUnavailable =>
+      'ప్రామాణీకరణ సేవకు కనెక్ట్ కాలేకపోయింది. మీ కనెక్షన్‌ను తనిఖీ చేయండి.';
+
+  @override
+  String get otpInvalid =>
+      'కోడ్ చెల్లదు, గడువు ముగిసింది లేదా ఇప్పటికే ఉపయోగించబడింది.';
+
+  @override
+  String get otpRateLimited =>
+      'చాలా అభ్యర్థనలు లేదా ప్రయత్నాలు జరిగాయి. కొంతసేపు వేచి మళ్లీ ప్రయత్నించండి.';
+
+  @override
+  String get verificationWorkflowUnavailable =>
+      'ఈ ధృవీకరణ ప్రక్రియ ఇంకా అనుసంధానించబడలేదు.';
+
+  @override
+  String get verificationWorkflowNotice =>
+      'ఈ ధృవీకరణ ప్రక్రియ ఇంకా సమగ్రపరచబడలేదు.';
+
+  @override
+  String get otpRequestAccepted =>
+      'అర్హత ఉంటే, SMS ప్రదాత కోడ్ అభ్యర్థనను ఆమోదించింది. సందేశం రావడానికి కొంత సమయం పట్టవచ్చు.';
+
+  @override
+  String get mobileVerified =>
+      'మొబైల్ నంబర్ ధృవీకరించబడింది. దయచేసి సైన్ ఇన్ చేయండి.';
+
+  @override
+  String get mobileMissing => 'మొబైల్ నంబర్ లేదు. దయచేసి మళ్లీ నమోదు చేయండి.';
+
+  @override
+  String get accountStatusChanged =>
+      'ఖాతా స్థితి మారింది. దయచేసి మళ్లీ ప్రయత్నించండి.';
+
+  @override
+  String get verificationFailed =>
+      'ధృవీకరణ విఫలమైంది. దయచేసి మళ్లీ ప్రయత్నించండి.';
+
+  @override
+  String get requestingCode => 'కోడ్ అభ్యర్థిస్తోంది...';
+
+  @override
+  String resendCodeCountdown(int seconds) {
+    return '$seconds సెకన్లలో మళ్లీ పంపండి';
+  }
+
+  @override
+  String get continueWithGoogle => 'Googleతో కొనసాగించండి';
+
+  @override
+  String get orContinueWithGoogle => 'లేదా Googleతో కొనసాగించండి';
+
+  @override
+  String get orContinueWithMobile =>
+      'లేదా మొబైల్ మరియు పాస్‌వర్డ్‌తో ఖాతా సృష్టించండి';
+
+  @override
+  String get googleSignupHelp =>
+      'మీ Household ఖాతాను సక్రియం చేయడానికి ధృవీకరించిన మొబైల్ నంబర్ అవసరం.';
+
+  @override
+  String get useMobilePasswordInstead =>
+      'బదులుగా మొబైల్ మరియు పాస్‌వర్డ్ ఉపయోగించండి';
+
+  @override
+  String get googleAccountNotLinked =>
+      'ఈ Google ఖాతా ScrapWiseకు లింక్ కాలేదు. సైన్ అప్ చేయండి లేదా ఇప్పటికే ఉన్న ఖాతాకు లింక్ చేయండి.';
+
+  @override
+  String get googleAccountUnavailable =>
+      'ఈ ఖాతా సక్రియంగా లేదు లేదా మొబైల్ నంబర్ ధృవీకరించబడలేదు.';
+
+  @override
+  String get googleSignInFailed =>
+      'Google సైన్-ఇన్ పూర్తి కాలేదు. మళ్లీ ప్రయత్నించండి.';
+
+  @override
+  String get googleConfigurationMissing =>
+      'ఈ యాప్‌లో Google సైన్-ఇన్ కాన్ఫిగర్ కాలేదు. మద్దతును సంప్రదించండి.';
+
+  @override
+  String get googleIdentityInvalid =>
+      'Google సైన్-ఇన్ గడువు ముగిసింది లేదా ధృవీకరించబడలేదు. మళ్లీ ప్రయత్నించండి.';
+
+  @override
+  String get googleVerificationUnavailable =>
+      'Google ధృవీకరణ తాత్కాలికంగా అందుబాటులో లేదు. తర్వాత మళ్లీ ప్రయత్నించండి.';
+
+  @override
+  String get googleAccountConflict =>
+      'ఈ మొబైల్ నంబర్ లేదా Google గుర్తింపు ఇప్పటికే ఖాతాకు చెందినది. ఇప్పటికే ఉన్న పద్ధతితో సైన్ ఇన్ చేయండి.';
+
+  @override
+  String get linkGoogleTitle => 'మీ Google ఖాతాను లింక్ చేయండి';
+
+  @override
+  String get linkGoogleHelp =>
+      'Googleను లింక్ చేయడానికి ముందు యాజమాన్యాన్ని నిర్ధారించడానికి మీ మొబైల్ నంబర్ మరియు పాస్‌వర్డ్ నమోదు చేయండి.';
+
+  @override
+  String get linkGoogleAccount => 'Googleను ఇప్పటికే ఉన్న ఖాతాకు లింక్ చేయండి';
+
+  @override
+  String get googleLinkSuccess =>
+      'Google ఖాతా లింక్ చేయబడింది. ఇప్పుడు Googleతో సైన్ ఇన్ చేయవచ్చు.';
+
+  @override
+  String get reauthenticationFailed => 'పాస్‌వర్డ్ తప్పు. Google లింక్ కాలేదు.';
+
+  @override
+  String get loginInvalid => 'మొబైల్ నంబర్ లేదా పాస్‌వర్డ్ తప్పు.';
+
+  @override
+  String get accountAwaitingVerification =>
+      'మీ ఖాతా ధృవీకరణ లేదా ఆమోదం కోసం వేచి ఉంది.';
+
+  @override
+  String get loginDetailsInvalid =>
+      'లాగిన్ వివరాలు తప్పుగా ఉన్నాయి. తనిఖీ చేయండి.';
+
+  @override
+  String get authRateLimited =>
+      'చాలా ప్రయత్నాలు జరిగాయి. తర్వాత మళ్లీ ప్రయత్నించండి.';
+
+  @override
+  String get authServiceUnavailable =>
+      'ధృవీకరణ సేవ తాత్కాలికంగా అందుబాటులో లేదు. తర్వాత మళ్లీ ప్రయత్నించండి.';
 }

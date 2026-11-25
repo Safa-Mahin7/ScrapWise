@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:scrapwise/core/theme/app_theme.dart';
@@ -8,6 +9,7 @@ import 'package:scrapwise/features/household/models/locality_model.dart';
 import 'package:scrapwise/features/household/models/pickup_booking_model.dart';
 import 'package:scrapwise/features/household/screens/household_dashboard_screen.dart';
 import 'package:scrapwise/features/household/services/household_api_service.dart';
+import 'package:scrapwise/l10n/app_localizations.dart';
 
 class _TestAuthService extends AuthService {
   @override
@@ -48,6 +50,13 @@ void main() {
   Widget app() => ProviderScope(
         child: MaterialApp(
           theme: AppTheme.light,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
           home: HouseholdDashboardScreen(
             sessionController: session,
             apiService: apiService,
@@ -80,7 +89,8 @@ void main() {
 
     // 4. Verify booking form opens with material choices and strictly no weight entry
     expect(find.text('Request a scrap pickup'), findsOneWidget);
-    expect(find.text('Select materials available for collection'), findsOneWidget);
+    expect(
+        find.text('Select materials available for collection'), findsOneWidget);
     expect(find.textContaining('No weight entry required'), findsWidgets);
     expect(find.text('Estimated scrap weight'), findsNothing);
     expect(find.text('Actual scrap weight'), findsNothing);
@@ -121,7 +131,8 @@ void main() {
     expect(session.status, SessionStatus.unauthenticated);
   });
 
-  testWidgets('price board and safe recovery guide open with truthful disclaimers',
+  testWidgets(
+      'price board and safe recovery guide open with truthful disclaimers',
       (tester) async {
     tester.view.physicalSize = const Size(900, 1600);
     tester.view.devicePixelRatio = 1;

@@ -16,17 +16,30 @@ def get_auth_db():
 def current_user(credentials: HTTPAuthorizationCredentials | None = Depends(bearer), database=Depends(get_auth_db)) -> dict:
     if credentials is None or credentials.scheme.lower() != 'bearer':
         raise HTTPException(status_code=401, detail='Authentication required', headers={'WWW-Authenticate': 'Bearer'})
+    now = now_utc()
     session = database['auth_sessions'].find_one({
         'token_hash': token_digest(credentials.credentials),
-        'expires_at': {'$gt': now_utc()},
+        'expires_at': {'$gt': now},
+        '$or': [
+            {'access_expires_at': {'$gt': now}},
+            {'access_expires_at': {'$exists': False}},
+        ],
         'revoked': False,
     })
-    if session is None:
-        raise HTTPException(status_code=401, detail='Invalid or expired session')
-    user = database['users'].find_one({'user_id': session['user_id']})
-    if not user or user.get('status') != 'active' or not user.get('phone_verified'):
-        raise HTTPException(status_code=401, detail='Account or session inactive')
+    user = database['users'].find_one({'user_id': session['user_id']}) if session else None
+    if session is None or not session_account_is_active(session, user):
+        raise HTTPException(
+            status_code=401, detail='Invalid or expired session',
+            headers={'WWW-Authenticate': 'Bearer'},
+        )
     return user
+
+
+def session_account_is_active(session: dict, user: dict | None) -> bool:
+    return bool(
+        user and user.get('status') == 'active' and user.get('phone_verified')
+        and session.get('auth_version', 0) == user.get('auth_version', 0)
+    )
 
 
 def require_roles(*roles: str) -> Callable:
@@ -36,3 +49,10 @@ def require_roles(*roles: str) -> Callable:
             raise HTTPException(status_code=403, detail='Insufficient permissions')
         return user
     return check_role
+
+
+def has_permissions(user: dict, *permissions: str) -> bool:
+    assigned = user.get('permissions')
+    if not isinstance(assigned, (list, tuple, set)):
+        return False
+    return all(permission in assigned for permission in permissions)

@@ -2,6 +2,7 @@ from datetime import datetime, timezone, timedelta
 from zoneinfo import ZoneInfo
 from uuid import uuid4
 
+from pymongo.client_session import ClientSession
 from pymongo.collection import Collection
 
 from ..schemas.collection_transaction import (
@@ -14,7 +15,37 @@ INDIA_TZ = ZoneInfo("Asia/Kolkata")
 
 def create_collection_transaction(
     collection: Collection,
-    payload: CollectionTransactionCreate
+    payload: CollectionTransactionCreate,
+) -> dict:
+    return _insert_collection_transaction(
+        collection,
+        payload,
+        session=None,
+        transaction_id=None,
+    )
+
+
+def create_claimed_collection_transaction(
+    collection: Collection,
+    payload: CollectionTransactionCreate,
+    *,
+    session: ClientSession,
+    transaction_id: str,
+) -> dict:
+    return _insert_collection_transaction(
+        collection,
+        payload,
+        session=session,
+        transaction_id=transaction_id,
+    )
+
+
+def _insert_collection_transaction(
+    collection: Collection,
+    payload: CollectionTransactionCreate,
+    *,
+    session: ClientSession | None,
+    transaction_id: str | None,
 ) -> dict:
 
     data = payload.model_dump()
@@ -34,7 +65,7 @@ def create_collection_transaction(
 
     transaction = {
         **data,
-        "transaction_id": str(uuid4()),
+        "transaction_id": transaction_id or str(uuid4()),
         "total_amount": total_amount,
         "transaction_status": "awaiting_household_confirmation",
         "data_source": "real_collector_transaction",
@@ -42,7 +73,10 @@ def create_collection_transaction(
         "updated_at": now
     }
 
-    collection.insert_one(transaction)
+    if session is None:
+        collection.insert_one(transaction)
+    else:
+        collection.insert_one(transaction, session=session)
 
     # MongoDB's internal ObjectId is not needed in the API response.
     transaction.pop("_id", None)

@@ -39,7 +39,7 @@ class FakeCollection:
         results = [
             deepcopy(doc)
             for doc in self.documents
-            if all(doc.get(k) == v for k, v in query.items())
+            if self._matches(doc, query)
         ]
 
         if projection and projection.get("_id") == 0:
@@ -50,11 +50,22 @@ class FakeCollection:
 
     def update_one(self, query, update):
         for doc in self.documents:
-            if all(doc.get(k) == v for k, v in query.items()):
+            if self._matches(doc, query):
                 doc.update(update.get("$set", {}))
                 return type("Result", (), {"matched_count": 1})()
 
         return type("Result", (), {"matched_count": 0})()
+
+    @staticmethod
+    def _matches(document, query):
+        for key, expected in query.items():
+            if isinstance(expected, dict):
+                for operator, value in expected.items():
+                    if operator == "$exists" and (key in document) is not value:
+                        return False
+            elif document.get(key) != expected:
+                return False
+        return True
 
     def insert_many(self, documents):
         self.documents.extend(
@@ -106,6 +117,10 @@ def main():
     assert len(clusters.documents) == 1
 
     print("\nPICKUP WORKFLOW TEST PASSED!")
+
+
+def test_standalone_pickup_workflow():
+    main()
 
 
 if __name__ == "__main__":

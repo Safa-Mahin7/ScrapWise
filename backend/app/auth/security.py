@@ -10,7 +10,7 @@ from argon2.exceptions import InvalidHashError, VerificationError, VerifyMismatc
 from fastapi import HTTPException
 
 _passwords = PasswordHasher()
-_DUMMY_HASH = _passwords.hash('ScrapWise-no-such-user-2026!')
+_DUMMY_HASH = _passwords.hash(secrets.token_urlsafe(32))
 
 
 def now_utc() -> datetime:
@@ -27,10 +27,12 @@ def hash_password(password: str) -> str:
 
 
 def verify_password(password: str, digest: str | None) -> bool:
+    has_password = isinstance(digest, str) and bool(digest) and digest != _DUMMY_HASH
     try:
-        return _passwords.verify(digest or _DUMMY_HASH, password)
+        verified = _passwords.verify(digest if has_password else _DUMMY_HASH, password)
     except (VerifyMismatchError, VerificationError, InvalidHashError, TypeError):
         return False
+    return has_password and verified
 
 
 def random_secret() -> str:
@@ -55,5 +57,5 @@ def compare_digest(a: str, b: str) -> bool:
 
 def ensure_password(password: str) -> str:
     if len(password) < 10 or len(password) > 128:
-        raise HTTPException(status_code=422, detail='Password must be 10–128 characters')
+        raise HTTPException(status_code=422, detail='Password must be 10â€“128 characters')
     return password

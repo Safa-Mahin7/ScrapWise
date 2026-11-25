@@ -8,18 +8,22 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/sw_button.dart';
 import '../../../core/widgets/sw_text_field.dart';
 import '../../../l10n/app_localizations.dart';
+import '../services/google_identity_provider.dart';
 import '../services/session_controller.dart';
 import '../widgets/auth_components.dart';
+import '../widgets/google_sign_in_action_button.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({
     super.key,
     this.isLoading = false,
     this.sessionController,
+    this.googleIdentityProvider,
   });
 
   final bool isLoading;
   final SessionController? sessionController;
+  final GoogleIdentityProvider? googleIdentityProvider;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -80,40 +84,11 @@ class _LoginScreenState extends State<LoginScreen> {
     } on DioException catch (error) {
       if (!mounted) return;
 
-      String message;
-
-      switch (error.response?.statusCode) {
-        case 401:
-          message = 'Authentication failed or your session is invalid.';
-          break;
-
-        case 403:
-          message = 'Your account is awaiting verification or approval.';
-          break;
-
-        case 422:
-          message = 'Invalid login details. Please check your input.';
-          break;
-
-        case 429:
-          message = 'Too many attempts. Please try again later.';
-          break;
-
-        case 503:
-          message = 'Authentication service is temporarily unavailable.';
-          break;
-
-        default:
-          if (error.response == null) {
-            message = 'Cannot connect to the server. Check your connection '
-                'and make sure FastAPI is running.';
-          } else {
-            message = 'Login failed. Please try again.';
-          }
-      }
-
       setState(() {
-        _errorMessage = message;
+        _errorMessage = _passwordLoginError(
+          error,
+          AppLocalizations.of(context),
+        );
       });
     } on StateError catch (_) {
       if (!mounted) return;
@@ -135,6 +110,79 @@ class _LoginScreenState extends State<LoginScreen> {
         });
       }
     }
+  }
+
+  String _passwordLoginError(DioException error, AppLocalizations l10n) {
+    return switch (error.response?.statusCode) {
+      401 => l10n.loginInvalid,
+      403 => l10n.accountAwaitingVerification,
+      422 => l10n.loginDetailsInvalid,
+      429 => l10n.authRateLimited,
+      503 => l10n.authServiceUnavailable,
+      _ => error.response == null
+          ? l10n.authNetworkUnavailable
+          : l10n.errorGeneric,
+    };
+  }
+
+  Future<void> _onGoogleSignIn(String idToken) async {
+    if (_isSubmitting || widget.isLoading) return;
+    setState(() {
+      _isSubmitting = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final verifiedUser = await _session.signInWithGoogle(idToken: idToken);
+      if (!mounted) return;
+      final dashboard =
+          SessionController.dashboardForRole(verifiedUser['role']);
+      if (dashboard == null) {
+        throw StateError('Unsupported account role');
+      }
+      context.go(dashboard);
+    } on DioException catch (error) {
+      if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
+      setState(() {
+        _errorMessage = switch (error.response?.statusCode) {
+          401 => l10n.googleIdentityInvalid,
+          403 => l10n.googleAccountUnavailable,
+          404 => l10n.googleAccountNotLinked,
+          429 => l10n.authRateLimited,
+          503 => l10n.googleVerificationUnavailable,
+          _ => error.response == null
+              ? l10n.authNetworkUnavailable
+              : l10n.googleSignInFailed,
+        };
+      });
+    } on StateError {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = AppLocalizations.of(context).googleSignInFailed;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = AppLocalizations.of(context).googleSignInFailed;
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
+  }
+
+  void _onGoogleError(Object error) {
+    if (!mounted) return;
+    final l10n = AppLocalizations.of(context);
+    setState(() {
+      _errorMessage = error is GoogleIdentityConfigurationException
+          ? l10n.googleConfigurationMissing
+          : l10n.googleSignInFailed;
+    });
   }
 
   @override
@@ -219,7 +267,28 @@ class _LoginScreenState extends State<LoginScreen> {
               onPressed: (_isSubmitting || widget.isLoading) ? null : _onSignIn,
               isLoading: _isSubmitting || widget.isLoading,
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
+            Text(
+              l10n.orContinueWithGoogle,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.bodySmall,
+            ),
+            const SizedBox(height: 12),
+            GoogleSignInActionButton(
+              label: l10n.continueWithGoogle,
+              provider: widget.googleIdentityProvider,
+              disabled: _isSubmitting || widget.isLoading,
+              onIdToken: _onGoogleSignIn,
+              onError: _onGoogleError,
+            ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: (_isSubmitting || widget.isLoading)
+                  ? null
+                  : () => context.go(AppConstants.routeLinkGoogle),
+              child: Text(l10n.linkGoogleAccount),
+            ),
+            const SizedBox(height: 8),
             Wrap(
               alignment: WrapAlignment.center,
               crossAxisAlignment: WrapCrossAlignment.center,

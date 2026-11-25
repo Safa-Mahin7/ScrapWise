@@ -95,7 +95,7 @@ class _CollectorInvitationScreenState extends State<CollectorInvitationScreen> {
                 if (value == null || value.isEmpty) {
                   return l10n.passwordRequired;
                 }
-                if (value.length < 6) return l10n.passwordTooShort;
+                if (value.length < 10) return l10n.passwordTooShort;
                 return null;
               },
             ),

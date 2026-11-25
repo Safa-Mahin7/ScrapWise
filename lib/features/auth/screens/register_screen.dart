@@ -7,10 +7,19 @@ import '../../../core/widgets/sw_button.dart';
 import '../../../core/widgets/sw_text_field.dart';
 import '../../../l10n/app_localizations.dart';
 import '../services/auth_service.dart';
+import '../services/google_identity_provider.dart';
 import '../widgets/auth_components.dart';
+import '../widgets/google_sign_in_action_button.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+  const RegisterScreen({
+    super.key,
+    this.authService,
+    this.googleIdentityProvider,
+  });
+
+  final AuthService? authService;
+  final GoogleIdentityProvider? googleIdentityProvider;
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -25,10 +34,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
 
-  final _authService = AuthService();
+  late final AuthService _authService;
 
   bool _isSubmitting = false;
   String? _errorMessage;
+  String? _googleIdToken;
+
+  @override
+  void initState() {
+    super.initState();
+    _authService = widget.authService ?? AuthService.shared;
+  }
 
   @override
   void dispose() {
@@ -53,14 +69,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     final mobile = _mobileController.text.trim();
+    final googleIdToken = _googleIdToken;
 
     try {
-      await _authService.registerHousehold(
-        fullName: _nameController.text.trim(),
-        mobile: mobile,
-        localityId: _localityController.text.trim(),
-        password: _passwordController.text,
-      );
+      if (googleIdToken == null) {
+        await _authService.registerHousehold(
+          fullName: _nameController.text.trim(),
+          mobile: mobile,
+          localityId: _localityController.text.trim(),
+          password: _passwordController.text,
+        );
+      } else {
+        await _authService.registerGoogleHousehold(
+          idToken: googleIdToken,
+          fullName: _nameController.text.trim(),
+          mobile: mobile,
+          localityId: _localityController.text.trim(),
+        );
+      }
 
       if (!mounted) return;
 
@@ -72,42 +98,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
     } on DioException catch (error) {
       if (!mounted) return;
 
-      String message;
-
-      switch (error.response?.statusCode) {
-        case 409:
-          message = 'This mobile number is already registered.';
-          break;
-
-        case 422:
-          message = 'Please check your details and try again.';
-          break;
-
-        case 429:
-          message = 'Too many requests. Please try again later.';
-          break;
-
-        case 503:
-          message = 'Registration is currently unavailable because '
-              'SMS verification is not configured or is down. '
-              'Please try again later.';
-          break;
-
-        default:
-          message = error.response == null
-              ? 'Cannot connect to FastAPI. Check the server '
-                  'and network settings.'
-              : 'Registration failed. Please try again.';
-      }
-
+      final l10n = AppLocalizations.of(context);
       setState(() {
-        _errorMessage = message;
+        _errorMessage = switch (error.response?.statusCode) {
+          401 => l10n.googleIdentityInvalid,
+          403 => l10n.googleAccountUnavailable,
+          409 => googleIdToken == null
+              ? l10n.mobileAlreadyRegistered
+              : l10n.googleAccountConflict,
+          422 => l10n.registrationDetailsInvalid,
+          429 => l10n.otpRateLimited,
+          503 => googleIdToken == null
+              ? l10n.smsUnavailable
+              : l10n.googleVerificationUnavailable,
+          _ => error.response == null
+              ? l10n.authNetworkUnavailable
+              : l10n.errorGeneric,
+        };
       });
     } catch (_) {
       if (!mounted) return;
 
       setState(() {
-        _errorMessage = 'An unexpected error occurred.';
+        _errorMessage = AppLocalizations.of(context).errorGeneric;
       });
     } finally {
       if (mounted) {
@@ -116,6 +129,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
         });
       }
     }
+  }
+
+  void _onGoogleToken(String idToken) {
+    if (!mounted) return;
+    setState(() {
+      _googleIdToken = idToken;
+      _errorMessage = null;
+    });
+  }
+
+  void _onGoogleError(Object error) {
+    if (!mounted) return;
+    final l10n = AppLocalizations.of(context);
+    setState(() {
+      _errorMessage = error is GoogleIdentityConfigurationException
+          ? l10n.googleConfigurationMissing
+          : l10n.googleSignInFailed;
+    });
   }
 
   @override
@@ -131,6 +162,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (_googleIdToken == null) ...[
+              GoogleSignInActionButton(
+                label: l10n.continueWithGoogle,
+                provider: widget.googleIdentityProvider,
+                disabled: _isSubmitting,
+                onIdToken: (idToken) async => _onGoogleToken(idToken),
+                onError: _onGoogleError,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                l10n.orContinueWithMobile,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+            ] else ...[
+              AuthNotice(message: l10n.googleSignupHelp),
+              const SizedBox(height: 16),
+            ],
             SwTextField(
               controller: _nameController,
               label: l10n.fullName,
@@ -144,7 +193,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 if (name.isEmpty) return l10n.nameRequired;
 
                 if (name.length < 2 || name.length > 120) {
-                  return 'Name must be 2–120 characters.';
+                  return 'Name must be 2â€“120 characters.';
                 }
 
                 return null;
@@ -189,57 +238,51 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 16),
-            SwTextField(
-              controller: _passwordController,
-              label: l10n.password,
-              hint: l10n.passwordCreateHint,
-              obscureText: true,
-              showPasswordLabel: l10n.showPassword,
-              hidePasswordLabel: l10n.hidePassword,
-              prefixIcon: Icons.lock_outline_rounded,
-              textInputAction: TextInputAction.next,
-              autofillHints: const [
-                AutofillHints.newPassword,
-              ],
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return l10n.passwordRequired;
-                }
-
-                if (value.length < 10 || value.length > 128) {
-                  return 'Password must be 10–128 characters.';
-                }
-
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            SwTextField(
-              controller: _confirmController,
-              label: l10n.confirmPassword,
-              hint: l10n.confirmPasswordHint,
-              obscureText: true,
-              showPasswordLabel: l10n.showPassword,
-              hidePasswordLabel: l10n.hidePassword,
-              prefixIcon: Icons.lock_outline_rounded,
-              textInputAction: TextInputAction.done,
-              onFieldSubmitted: (_) => _onRegister(),
-              autofillHints: const [
-                AutofillHints.newPassword,
-              ],
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return l10n.confirmPasswordRequired;
-                }
-
-                if (value != _passwordController.text) {
-                  return l10n.passwordsDoNotMatch;
-                }
-
-                return null;
-              },
-            ),
+            if (_googleIdToken == null) ...[
+              const SizedBox(height: 16),
+              SwTextField(
+                controller: _passwordController,
+                label: l10n.password,
+                hint: l10n.passwordCreateHint,
+                obscureText: true,
+                showPasswordLabel: l10n.showPassword,
+                hidePasswordLabel: l10n.hidePassword,
+                prefixIcon: Icons.lock_outline_rounded,
+                textInputAction: TextInputAction.next,
+                autofillHints: const [AutofillHints.newPassword],
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return l10n.passwordRequired;
+                  }
+                  if (value.length < 10 || value.length > 128) {
+                    return 'Password must be 10â€“128 characters.';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              SwTextField(
+                controller: _confirmController,
+                label: l10n.confirmPassword,
+                hint: l10n.confirmPasswordHint,
+                obscureText: true,
+                showPasswordLabel: l10n.showPassword,
+                hidePasswordLabel: l10n.hidePassword,
+                prefixIcon: Icons.lock_outline_rounded,
+                textInputAction: TextInputAction.done,
+                onFieldSubmitted: (_) => _onRegister(),
+                autofillHints: const [AutofillHints.newPassword],
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return l10n.confirmPasswordRequired;
+                  }
+                  if (value != _passwordController.text) {
+                    return l10n.passwordsDoNotMatch;
+                  }
+                  return null;
+                },
+              ),
+            ],
             if (_errorMessage != null) ...[
               const SizedBox(height: 16),
               AuthNotice(
@@ -249,10 +292,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ],
             const SizedBox(height: 24),
             SwButton(
-              label: l10n.createAccount,
+              label: _googleIdToken == null
+                  ? l10n.createAccount
+                  : l10n.continueButton,
               onPressed: _isSubmitting ? null : _onRegister,
               isLoading: _isSubmitting,
             ),
+            if (_googleIdToken != null)
+              TextButton(
+                onPressed: _isSubmitting
+                    ? null
+                    : () => setState(() {
+                          _googleIdToken = null;
+                          _errorMessage = null;
+                        }),
+                child: Text(l10n.useMobilePasswordInstead),
+              ),
             const SizedBox(height: 16),
             TextButton(
               onPressed: _isSubmitting

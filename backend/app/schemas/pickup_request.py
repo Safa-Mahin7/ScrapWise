@@ -36,6 +36,10 @@ class PickupRequestCreate(BaseModel):
         return cleaned
 
 
+class PickupAssignmentRequest(BaseModel):
+    collector_id: str = Field(min_length=1, max_length=128)
+
+
 class PickupRequestResponse(BaseModel):
     request_id: str
     household_id: str

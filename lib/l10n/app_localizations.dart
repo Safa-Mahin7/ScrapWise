@@ -353,7 +353,7 @@ abstract class AppLocalizations {
   /// No description provided for @passwordTooShort.
   ///
   /// In en, this message translates to:
-  /// **'Password must be at least 6 characters'**
+  /// **'Password must be at least 10 characters'**
   String get passwordTooShort;
 
   /// No description provided for @confirmPasswordRequired.
@@ -383,8 +383,14 @@ abstract class AppLocalizations {
   /// No description provided for @forgotPasswordHelp.
   ///
   /// In en, this message translates to:
-  /// **'Enter the mobile number for your account. Code delivery is not available yet.'**
+  /// **'Enter the mobile number for your account. If it has a password, a verification code will be requested. Google-only accounts should use Continue with Google.'**
   String get forgotPasswordHelp;
+
+  /// No description provided for @recoveryDeliveryNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'For privacy, this message is the same for every number. If you do not receive a code, sign in with Google if your account uses Google.'**
+  String get recoveryDeliveryNotice;
 
   /// No description provided for @sendCode.
   ///
@@ -449,7 +455,7 @@ abstract class AppLocalizations {
   /// No description provided for @newPasswordHelp.
   ///
   /// In en, this message translates to:
-  /// **'This form is a UI scaffold. A verified recovery session is required to reset a password.'**
+  /// **'Choose a password with at least 10 characters. Your other sessions will be signed out.'**
   String get newPasswordHelp;
 
   /// No description provided for @newPassword.
@@ -473,7 +479,7 @@ abstract class AppLocalizations {
   /// No description provided for @changeMobileHelp.
   ///
   /// In en, this message translates to:
-  /// **'This account setting is available to signed-in users after authentication is integrated.'**
+  /// **'Confirm your identity with your current password or Google, then verify the new number by SMS. You will need to sign in again.'**
   String get changeMobileHelp;
 
   /// No description provided for @currentMobile.
@@ -605,8 +611,56 @@ abstract class AppLocalizations {
   /// No description provided for @phoneChangeAction.
   ///
   /// In en, this message translates to:
-  /// **'Continue to phone verification'**
+  /// **'Send verification code'**
   String get phoneChangeAction;
+
+  /// No description provided for @accountSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Settings'**
+  String get accountSettings;
+
+  /// No description provided for @changeMobileAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Mobile Number'**
+  String get changeMobileAction;
+
+  /// No description provided for @mobileChangeReauth.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enter your password or continue with Google to confirm it is you.'**
+  String get mobileChangeReauth;
+
+  /// No description provided for @mobileChangeConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'This number is already in use or another mobile change is pending.'**
+  String get mobileChangeConflict;
+
+  /// No description provided for @mobileChangeSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile number changed. Sign in again with the new number.'**
+  String get mobileChangeSuccess;
+
+  /// No description provided for @passwordResetSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Password changed. Sign in with your new password.'**
+  String get passwordResetSuccess;
+
+  /// No description provided for @sessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session expired. Sign in again to continue.'**
+  String get sessionExpired;
+
+  /// No description provided for @smsDeliveryUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The SMS service is temporarily unavailable. No verification code was sent.'**
+  String get smsDeliveryUnavailable;
 
   /// No description provided for @previewNewPassword.
   ///
@@ -629,8 +683,230 @@ abstract class AppLocalizations {
   /// No description provided for @passwordResetUnavailable.
   ///
   /// In en, this message translates to:
-  /// **'Password reset is unavailable until the authentication backend is connected. No password was changed.'**
+  /// **'Password reset could not be completed. Request a new verification code and try again.'**
   String get passwordResetUnavailable;
+
+  /// No description provided for @mobileAlreadyRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'This mobile number is already registered.'**
+  String get mobileAlreadyRegistered;
+
+  /// No description provided for @registrationDetailsInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Please check your details and try again.'**
+  String get registrationDetailsInvalid;
+
+  /// No description provided for @smsUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'SMS verification is temporarily unavailable. No account was activated. Please try again later.'**
+  String get smsUnavailable;
+
+  /// No description provided for @authNetworkUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot connect to the authentication service. Check your connection.'**
+  String get authNetworkUnavailable;
+
+  /// No description provided for @otpInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'The code is invalid, expired, or already used.'**
+  String get otpInvalid;
+
+  /// No description provided for @otpRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many requests or attempts. Please wait and try again.'**
+  String get otpRateLimited;
+
+  /// No description provided for @verificationWorkflowUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This verification workflow is not connected yet.'**
+  String get verificationWorkflowUnavailable;
+
+  /// No description provided for @verificationWorkflowNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'This verification workflow is not integrated yet.'**
+  String get verificationWorkflowNotice;
+
+  /// No description provided for @otpRequestAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'If eligible, your code request was accepted by the SMS provider. Delivery may take a moment.'**
+  String get otpRequestAccepted;
+
+  /// No description provided for @mobileVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile number verified. Please sign in.'**
+  String get mobileVerified;
+
+  /// No description provided for @mobileMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile number is missing. Please register again.'**
+  String get mobileMissing;
+
+  /// No description provided for @accountStatusChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Account status changed. Please try again.'**
+  String get accountStatusChanged;
+
+  /// No description provided for @verificationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification failed. Please try again.'**
+  String get verificationFailed;
+
+  /// No description provided for @requestingCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Requesting code...'**
+  String get requestingCode;
+
+  /// No description provided for @resendCodeCountdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend in {seconds}s'**
+  String resendCodeCountdown(int seconds);
+
+  /// No description provided for @continueWithGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Google'**
+  String get continueWithGoogle;
+
+  /// No description provided for @orContinueWithGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Or continue with Google'**
+  String get orContinueWithGoogle;
+
+  /// No description provided for @orContinueWithMobile.
+  ///
+  /// In en, this message translates to:
+  /// **'Or create an account with mobile and password'**
+  String get orContinueWithMobile;
+
+  /// No description provided for @googleSignupHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'A verified mobile number is required to activate your Household account.'**
+  String get googleSignupHelp;
+
+  /// No description provided for @useMobilePasswordInstead.
+  ///
+  /// In en, this message translates to:
+  /// **'Use mobile and password instead'**
+  String get useMobilePasswordInstead;
+
+  /// No description provided for @googleAccountNotLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'This Google account is not linked to ScrapWise. Sign up or link it to an existing account.'**
+  String get googleAccountNotLinked;
+
+  /// No description provided for @googleAccountUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This account is not active or its mobile number is not verified.'**
+  String get googleAccountUnavailable;
+
+  /// No description provided for @googleSignInFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Google sign-in could not be completed. Please try again.'**
+  String get googleSignInFailed;
+
+  /// No description provided for @googleConfigurationMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Google sign-in is not configured for this app. Contact support.'**
+  String get googleConfigurationMissing;
+
+  /// No description provided for @googleIdentityInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Google sign-in expired or could not be verified. Please try again.'**
+  String get googleIdentityInvalid;
+
+  /// No description provided for @googleVerificationUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Google verification is temporarily unavailable. Please try again later.'**
+  String get googleVerificationUnavailable;
+
+  /// No description provided for @googleAccountConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'This mobile number or Google identity already belongs to an account. Sign in with your existing method.'**
+  String get googleAccountConflict;
+
+  /// No description provided for @linkGoogleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Link your Google account'**
+  String get linkGoogleTitle;
+
+  /// No description provided for @linkGoogleHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your mobile number and password to confirm ownership before linking Google.'**
+  String get linkGoogleHelp;
+
+  /// No description provided for @linkGoogleAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Link Google to an existing account'**
+  String get linkGoogleAccount;
+
+  /// No description provided for @googleLinkSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Google account linked. You can now sign in with Google.'**
+  String get googleLinkSuccess;
+
+  /// No description provided for @reauthenticationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The password is incorrect. Google was not linked.'**
+  String get reauthenticationFailed;
+
+  /// No description provided for @loginInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid mobile number or password.'**
+  String get loginInvalid;
+
+  /// No description provided for @accountAwaitingVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account is awaiting verification or approval.'**
+  String get accountAwaitingVerification;
+
+  /// No description provided for @loginDetailsInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid login details. Please check your input.'**
+  String get loginDetailsInvalid;
+
+  /// No description provided for @authRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Please try again later.'**
+  String get authRateLimited;
+
+  /// No description provided for @authServiceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication is temporarily unavailable. Please try again later.'**
+  String get authServiceUnavailable;
 }
 
 class _AppLocalizationsDelegate

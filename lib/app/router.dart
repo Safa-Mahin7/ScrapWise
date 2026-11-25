@@ -6,6 +6,8 @@ import '../features/onboarding/screens/language_selection_screen.dart';
 import '../features/onboarding/screens/landing_screen.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/register_screen.dart';
+import '../features/auth/screens/link_google_screen.dart';
+import '../features/auth/screens/change_mobile_screen.dart';
 import '../features/auth/screens/forgot_password_screen.dart';
 import '../features/auth/screens/otp_verification_screen.dart';
 import '../features/auth/screens/new_password_screen.dart';
@@ -14,6 +16,8 @@ import '../features/auth/screens/trader_application_screen.dart';
 import '../features/auth/screens/trader_application_status_screen.dart';
 import '../features/auth/screens/role_dashboard_screen.dart';
 import '../features/household/screens/household_dashboard_screen.dart';
+import '../features/auth/services/auth_service.dart';
+import '../features/auth/services/google_identity_provider.dart';
 import '../features/auth/services/session_controller.dart';
 
 /// Route guards depend on server-verified session state, not a role choice.
@@ -22,6 +26,8 @@ final GoRouter appRouter = createAppRouter();
 GoRouter createAppRouter({
   String? initialLocation,
   SessionController? sessionController,
+  AuthService? authService,
+  GoogleIdentityProvider? googleIdentityProvider,
 }) {
   final session = sessionController ?? SessionController.instance;
   return GoRouter(
@@ -30,7 +36,13 @@ GoRouter createAppRouter({
     refreshListenable: session,
     redirect: (context, state) {
       final path = state.uri.path;
-      final protected = path.startsWith('/dashboard/');
+      final isDashboard = path.startsWith('/dashboard/');
+      final isMobileChangeOtp =
+          state.pathParameters['purpose'] == 'phone-change';
+      final protected = isDashboard ||
+          path == AppConstants.routeChangeMobile ||
+          path == AppConstants.routeLinkGoogle ||
+          isMobileChangeOtp;
 
       if (protected) {
         if (session.status == SessionStatus.unknown ||
@@ -38,7 +50,9 @@ GoRouter createAppRouter({
           return AppConstants.routeSplash;
         }
         if (!session.isAuthenticated) return AppConstants.routeLogin;
-        return path == session.dashboardPath ? null : session.dashboardPath;
+        if (isDashboard && path != session.dashboardPath) {
+          return session.dashboardPath;
+        }
       }
 
       if (session.isAuthenticated &&
@@ -80,7 +94,10 @@ GoRouter createAppRouter({
         name: 'login',
         pageBuilder: (context, state) => _buildPage(
           state: state,
-          child: const LoginScreen(),
+          child: LoginScreen(
+            sessionController: session,
+            googleIdentityProvider: googleIdentityProvider,
+          ),
         ),
       ),
       GoRoute(
@@ -88,7 +105,33 @@ GoRouter createAppRouter({
         name: 'register',
         pageBuilder: (context, state) => _buildPage(
           state: state,
-          child: const RegisterScreen(),
+          child: RegisterScreen(
+            authService: authService,
+            googleIdentityProvider: googleIdentityProvider,
+          ),
+        ),
+      ),
+      GoRoute(
+        path: AppConstants.routeLinkGoogle,
+        name: 'link-google',
+        pageBuilder: (context, state) => _buildPage(
+          state: state,
+          child: LinkGoogleScreen(
+            sessionController: session,
+            googleIdentityProvider: googleIdentityProvider,
+          ),
+        ),
+      ),
+      GoRoute(
+        path: AppConstants.routeChangeMobile,
+        name: 'change-mobile',
+        pageBuilder: (context, state) => _buildPage(
+          state: state,
+          child: ChangeMobileScreen(
+            authService: authService,
+            sessionController: session,
+            googleIdentityProvider: googleIdentityProvider,
+          ),
         ),
       ),
       GoRoute(
@@ -96,7 +139,7 @@ GoRouter createAppRouter({
         name: 'forgot-password',
         pageBuilder: (context, state) => _buildPage(
           state: state,
-          child: const ForgotPasswordScreen(),
+          child: ForgotPasswordScreen(authService: authService),
         ),
       ),
       GoRoute(
@@ -107,16 +150,27 @@ GoRouter createAppRouter({
           child: OtpVerificationScreen(
             purpose: OtpPurposeLabel.fromRoute(state.pathParameters['purpose']),
             phoneNumber: state.extra is String ? state.extra as String : null,
+            authService: authService,
+            sessionController: session,
           ),
         ),
       ),
       GoRoute(
         path: AppConstants.routeNewPassword,
         name: 'new-password',
-        pageBuilder: (context, state) => _buildPage(
-          state: state,
-          child: const NewPasswordScreen(),
-        ),
+        pageBuilder: (context, state) {
+          final extra = state.extra;
+          final resetData = extra is Map ? extra : const <String, String>{};
+          return _buildPage(
+            state: state,
+            child: NewPasswordScreen(
+              mobile: resetData['mobile'] as String?,
+              resetToken: resetData['reset_token'] as String?,
+              authService: authService,
+              sessionController: session,
+            ),
+          );
+        },
       ),
       GoRoute(
         path: AppConstants.routeCollectorInvitation,

@@ -8,9 +8,16 @@ from backend.app.routers.collection_transactions import router
 from backend.app.routers.pickup_requests import router as pickup_router
 from backend.app.routers.forecast import router as forecast_router
 from backend.app.routers.auth import router as auth_router, initialize_auth_indexes
+from backend.app.services.collection_transaction_index import (
+    verify_collection_transaction_index,
+)
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     initialize_auth_indexes()
+    verify_collection_transaction_index(
+        client[DATABASE_NAME]["collection_transactions"]
+    )
     yield
 app = FastAPI(
     title="ScrapWise API",

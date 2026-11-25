@@ -21,17 +21,5 @@ class ApiClient {
         'Accept': 'application/json',
       },
     ),
-  )..interceptors.add(
-      LogInterceptor(
-        requestBody: false,
-        responseBody: false,
-        logPrint: (obj) => debugPrint(obj.toString()),
-      ),
-    );
-}
-
-// ignore: avoid_annotating_with_dynamic
-void debugPrint(dynamic msg) {
-  // ignore: avoid_print
-  print(msg);
+  );
 }

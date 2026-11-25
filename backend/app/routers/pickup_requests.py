@@ -1,12 +1,13 @@
 
 from datetime import date
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 from pymongo.errors import PyMongoError
 
-from ..database import db
+from ..auth.dependencies import get_auth_db, has_permissions, require_roles
 from ..schemas.pickup_request import (
+    PickupAssignmentRequest,
     PickupRequestCreate,
     PickupRequestResponse,
 )
@@ -21,10 +22,6 @@ router = APIRouter(
     prefix="/api/pickups",
     tags=["Pickup Requests"],
 )
-
-pickup_collection = db["pickup_requests"]
-cluster_collection = db["pickup_clusters"]
-
 
 # Verified locality reference points.
 # These are map reference points, NOT ward boundaries.
@@ -115,11 +112,21 @@ class ClusterRunRequest(BaseModel):
     response_model=PickupRequestResponse,
     status_code=status.HTTP_201_CREATED,
 )
-def create_request(payload: PickupRequestCreate):
+def create_request(
+    payload: PickupRequestCreate,
+    database=Depends(get_auth_db),
+    household=Depends(require_roles("household")),
+):
+    if payload.household_id != household["user_id"]:
+        raise HTTPException(
+            status_code=403,
+            detail="Pickup household must match the authenticated account.",
+        )
+
     try:
         return create_pickup_request(
-            pickup_collection,
-            payload,
+            database["pickup_requests"],
+            payload.model_copy(update={"household_id": household["user_id"]}),
         )
     except PyMongoError as error:
         raise HTTPException(
@@ -128,13 +135,19 @@ def create_request(payload: PickupRequestCreate):
         ) from error
 
 
-# 2. GET PENDING REQUESTS
+# 2. HOUSEHOLD PICKUP HISTORY
 
-@router.get("/pending")
-def list_pending_requests():
+@router.get("/my")
+def list_my_requests(
+    database=Depends(get_auth_db),
+    household=Depends(require_roles("household")),
+):
     try:
-        return get_pending_pickup_requests(
-            pickup_collection
+        return list(
+            database["pickup_requests"].find(
+                {"household_id": household["user_id"]},
+                {"_id": 0},
+            ).sort("created_at", -1)
         )
     except PyMongoError as error:
         raise HTTPException(
@@ -143,16 +156,163 @@ def list_pending_requests():
         ) from error
 
 
-# 3. DBSCAN CLUSTERING
+# 3. GET ASSIGNED PENDING REQUESTS
+
+@router.get("/pending")
+def list_pending_requests(
+    database=Depends(get_auth_db),
+    user=Depends(require_roles("collector", "trader", "admin")),
+):
+    try:
+        filters = {}
+        if user["role"] == "collector":
+            filters["assigned_collector_id"] = user["user_id"]
+        elif user["role"] == "trader":
+            collector_ids = [
+                collector["user_id"]
+                for collector in database["users"].find(
+                    {
+                        "role": "collector",
+                        "status": "active",
+                        "phone_verified": True,
+                        "invited_by_user_id": user["user_id"],
+                    },
+                    {"user_id": 1, "_id": 0},
+                )
+            ]
+            filters["assigned_collector_id"] = {"$in": collector_ids}
+        elif not has_permissions(user, "pickups:read_all"):
+            raise HTTPException(status_code=403, detail="Insufficient permissions")
+
+        return get_pending_pickup_requests(
+            database["pickup_requests"],
+            filters,
+        )
+    except HTTPException:
+        raise
+    except PyMongoError as error:
+        raise HTTPException(
+            status_code=503,
+            detail="Could not retrieve pickup requests.",
+        ) from error
+
+
+# 4. ASSIGN PICKUP TO COLLECTOR
+
+@router.post("/{request_id}/assignment")
+def assign_pickup(
+    request_id: str,
+    payload: PickupAssignmentRequest,
+    database=Depends(get_auth_db),
+    user=Depends(require_roles("trader", "admin")),
+):
+    if user["role"] == "admin" and not has_permissions(user, "pickups:assign"):
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+
+    try:
+        pickup = database["pickup_requests"].find_one(
+            {"request_id": request_id}
+        )
+        if pickup is None:
+            raise HTTPException(status_code=404, detail="Pickup request not found")
+        if pickup.get("status") != "pending":
+            raise HTTPException(status_code=409, detail="Pickup request is not pending")
+        if (
+            "collection_transaction_id" in pickup
+            or database["collection_transactions"].find_one(
+                {"request_id": request_id},
+                {"_id": 1},
+            )
+        ):
+            raise HTTPException(
+                status_code=409,
+                detail="Pickup already has a collection transaction.",
+            )
+
+        existing_collector_id = pickup.get("assigned_collector_id")
+        if user["role"] == "trader" and existing_collector_id:
+            existing_collector = database["users"].find_one({
+                "user_id": existing_collector_id,
+                "role": "collector",
+                "status": "active",
+            })
+            if (
+                existing_collector is None
+                or existing_collector.get("invited_by_user_id") != user["user_id"]
+            ):
+                raise HTTPException(
+                    status_code=403,
+                    detail="Pickup is assigned outside this trader's team",
+                )
+
+        collector = database["users"].find_one({
+            "user_id": payload.collector_id,
+            "role": "collector",
+            "status": "active",
+            "phone_verified": True,
+        })
+        if collector is None:
+            raise HTTPException(status_code=404, detail="Active collector not found")
+        if (
+            user["role"] == "trader"
+            and collector.get("invited_by_user_id") != user["user_id"]
+        ):
+            raise HTTPException(status_code=403, detail="Collector is not in this trader's team")
+
+        assignment_filter = {
+            "request_id": request_id,
+            "status": "pending",
+            "collection_transaction_id": {"$exists": False},
+        }
+        observed_values = []
+        for field in ("assigned_collector_id", "assigned_by_user_id"):
+            present = field in pickup
+            assignment_filter[field] = {"$exists": present}
+            if present:
+                # Compare the whole value, including null or legacy array values.
+                observed_values.append(
+                    {"$eq": [f"${field}", {"$literal": pickup[field]}]}
+                )
+        if observed_values:
+            assignment_filter["$expr"] = {"$and": observed_values}
+
+        result = database["pickup_requests"].update_one(
+            assignment_filter,
+            {"$set": {
+                "assigned_collector_id": collector["user_id"],
+                "assigned_by_user_id": user["user_id"],
+            }},
+        )
+        if not result.matched_count:
+            raise HTTPException(status_code=409, detail="Pickup assignment changed")
+        return {
+            "message": "Pickup assigned",
+            "request_id": request_id,
+            "collector_id": collector["user_id"],
+        }
+    except HTTPException:
+        raise
+    except PyMongoError as error:
+        raise HTTPException(
+            status_code=503,
+            detail="Could not assign pickup request.",
+        ) from error
+
+
+# 5. DBSCAN CLUSTERING
 
 @router.post("/cluster")
 def cluster_pending_requests(
     payload: ClusterRunRequest,
+    database=Depends(get_auth_db),
+    admin=Depends(require_roles("admin")),
 ):
+    if not has_permissions(admin, "pickups:cluster"):
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
     try:
         return generate_pickup_clusters(
-            pickup_collection,
-            cluster_collection,
+            database["pickup_requests"],
+            database["pickup_clusters"],
             eps_metres=payload.eps_metres,
             min_samples=payload.min_samples,
         )
@@ -168,15 +328,22 @@ def cluster_pending_requests(
         ) from error
 
 
-# 4. PICKUP DEMAND HEATMAP
+# 6. PICKUP DEMAND HEATMAP
 
 @router.get("/heatmap")
 def get_pickup_heatmap(
     pickup_date: date | None = Query(default=None),
     time_slot: str | None = Query(default=None),
     locality_id: str | None = Query(default=None),
+    database=Depends(get_auth_db),
+    admin=Depends(require_roles("admin")),
 ):
-    query = {"status": "pending"}
+    if not has_permissions(admin, "pickups:read_all"):
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+    query = {
+        "status": "pending",
+        "collection_transaction_id": {"$exists": False},
+    }
 
     if pickup_date:
         query["preferred_date"] = pickup_date.isoformat()
@@ -188,7 +355,7 @@ def get_pickup_heatmap(
         query["locality_id"] = locality_id
 
     try:
-        documents = pickup_collection.find(
+        documents = database["pickup_requests"].find(
             query,
             {
                 "_id": 0,
@@ -252,7 +419,7 @@ def get_pickup_heatmap(
         ) from error
 
 
-# 5. BALLARI LOCALITY REFERENCE
+# 7. BALLARI LOCALITY REFERENCE
 
 @router.get("/localities/ballari")
 def get_ballari_localities():

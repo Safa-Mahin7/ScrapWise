@@ -40,12 +40,18 @@ def create_pickup_request(
 
 def get_pending_pickup_requests(
     collection: Collection,
+    filters: dict | None = None,
 ) -> list:
     """Return all pending household pickup requests."""
 
+    query = {
+        "status": "pending",
+        "collection_transaction_id": {"$exists": False},
+        **(filters or {}),
+    }
     return list(
         collection.find(
-            {"status": "pending"},
+            query,
             {"_id": 0},
         ).sort("created_at", 1)
     )

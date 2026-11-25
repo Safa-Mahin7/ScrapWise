@@ -134,7 +134,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get passwordRequired => 'براہ کرم پاس ورڈ درج کریں';
 
   @override
-  String get passwordTooShort => 'پاس ورڈ کم از کم 6 حروف کا ہونا چاہیے';
+  String get passwordTooShort => 'پاس ورڈ کم از کم 10 حروف کا ہونا چاہیے';
 
   @override
   String get confirmPasswordRequired => 'براہ کرم پاس ورڈ کی تصدیق کریں';
@@ -151,7 +151,11 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get forgotPasswordHelp =>
-      'اپنے اکاؤنٹ کا موبائل نمبر درج کریں۔ کوڈ بھیجنے کی سہولت ابھی دستیاب نہیں۔';
+      'اپنے اکاؤنٹ کا موبائل نمبر درج کریں۔ پاس ورڈ والے اکاؤنٹ کو تصدیقی کوڈ بھیجا جائے گا۔ صرف Google استعمال کرنے والے اکاؤنٹ میں Google سے سائن ان کریں۔';
+
+  @override
+  String get recoveryDeliveryNotice =>
+      'رازداری کے لیے یہ پیغام ہر نمبر کے لیے یکساں ہے۔ کوڈ نہ ملے تو Google اکاؤنٹ سے Google کے ذریعے سائن ان کریں۔';
 
   @override
   String get sendCode => 'جاری رکھیں';
@@ -187,7 +191,7 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get newPasswordHelp =>
-      'یہ صرف UI اسکرین ہے۔ پاس ورڈ بدلنے کے لیے تصدیق شدہ ریکوری سیشن درکار ہے۔';
+      'کم از کم 10 حروف کا نیا پاس ورڈ منتخب کریں۔ آپ کے دوسرے سیشن سائن آؤٹ ہو جائیں گے۔';
 
   @override
   String get newPassword => 'نیا پاس ورڈ';
@@ -200,7 +204,7 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get changeMobileHelp =>
-      'توثیق کے انضمام کے بعد یہ اکاؤنٹ سہولت سائن ان صارفین کے لیے دستیاب ہوگی۔';
+      'اپنے موجودہ پاس ورڈ یا Google سے شناخت کی تصدیق کریں، پھر نئے نمبر کی SMS سے تصدیق کریں۔ اس کے بعد دوبارہ سائن ان کرنا ہوگا۔';
 
   @override
   String get currentMobile => 'موجودہ موبائل نمبر';
@@ -271,7 +275,37 @@ class AppLocalizationsUr extends AppLocalizations {
   String get hidePassword => 'پاس ورڈ چھپائیں';
 
   @override
-  String get phoneChangeAction => 'فون کی تصدیق جاری رکھیں';
+  String get phoneChangeAction => 'تصدیقی کوڈ بھیجیں';
+
+  @override
+  String get accountSettings => 'اکاؤنٹ کی ترتیبات';
+
+  @override
+  String get changeMobileAction => 'موبائل نمبر تبدیل کریں';
+
+  @override
+  String get mobileChangeReauth =>
+      'اپنی شناخت کی تصدیق کے لیے پاس ورڈ دوبارہ درج کریں یا Google کے ساتھ جاری رکھیں۔';
+
+  @override
+  String get mobileChangeConflict =>
+      'یہ نمبر پہلے ہی استعمال میں ہے یا موبائل کی ایک اور تبدیلی زیرِ التوا ہے۔';
+
+  @override
+  String get mobileChangeSuccess =>
+      'موبائل نمبر تبدیل ہو گیا۔ نئے نمبر سے دوبارہ سائن ان کریں۔';
+
+  @override
+  String get passwordResetSuccess =>
+      'پاس ورڈ تبدیل ہو گیا۔ نئے پاس ورڈ سے سائن ان کریں۔';
+
+  @override
+  String get sessionExpired =>
+      'آپ کا سیشن ختم ہو گیا۔ جاری رکھنے کے لیے دوبارہ سائن ان کریں۔';
+
+  @override
+  String get smsDeliveryUnavailable =>
+      'SMS سروس عارضی طور پر دستیاب نہیں۔ تصدیقی کوڈ نہیں بھیجا گیا۔';
 
   @override
   String get previewNewPassword => 'نئے پاس ورڈ فارم کا پیش منظر';
@@ -286,5 +320,143 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get passwordResetUnavailable =>
-      'توثیق بیک اینڈ منسلک ہونے تک پاس ورڈ ری سیٹ دستیاب نہیں۔ پاس ورڈ تبدیل نہیں ہوا۔';
+      'پاس ورڈ ری سیٹ نہیں ہو سکا۔ نیا تصدیقی کوڈ منگوا کر دوبارہ کوشش کریں۔';
+
+  @override
+  String get mobileAlreadyRegistered => 'یہ موبائل نمبر پہلے سے رجسٹرڈ ہے۔';
+
+  @override
+  String get registrationDetailsInvalid =>
+      'اپنی معلومات چیک کریں اور دوبارہ کوشش کریں۔';
+
+  @override
+  String get smsUnavailable =>
+      'SMS تصدیق عارضی طور پر دستیاب نہیں۔ اکاؤنٹ فعال نہیں ہوا۔ بعد میں دوبارہ کوشش کریں۔';
+
+  @override
+  String get authNetworkUnavailable =>
+      'توثیق سروس سے رابطہ نہیں ہو سکا۔ اپنا کنکشن چیک کریں۔';
+
+  @override
+  String get otpInvalid => 'کوڈ غلط، میعاد ختم یا پہلے ہی استعمال ہو چکا ہے۔';
+
+  @override
+  String get otpRateLimited =>
+      'بہت زیادہ درخواستیں یا کوششیں ہوئیں۔ انتظار کریں اور دوبارہ کوشش کریں۔';
+
+  @override
+  String get verificationWorkflowUnavailable =>
+      'تصدیق کا یہ طریقہ ابھی منسلک نہیں ہے۔';
+
+  @override
+  String get verificationWorkflowNotice =>
+      'تصدیق کا یہ طریقہ ابھی مربوط نہیں کیا گیا۔';
+
+  @override
+  String get otpRequestAccepted =>
+      'اگر آپ کا نمبر اہل ہے تو SMS فراہم کنندہ نے کوڈ کی درخواست قبول کر لی ہے۔ پیغام آنے میں کچھ وقت لگ سکتا ہے۔';
+
+  @override
+  String get mobileVerified =>
+      'موبائل نمبر کی تصدیق ہو گئی۔ براہ کرم سائن ان کریں۔';
+
+  @override
+  String get mobileMissing =>
+      'موبائل نمبر موجود نہیں۔ براہ کرم دوبارہ رجسٹر کریں۔';
+
+  @override
+  String get accountStatusChanged =>
+      'اکاؤنٹ کی حالت بدل گئی ہے۔ دوبارہ کوشش کریں۔';
+
+  @override
+  String get verificationFailed => 'تصدیق ناکام ہوئی۔ دوبارہ کوشش کریں۔';
+
+  @override
+  String get requestingCode => 'کوڈ کی درخواست ہو رہی ہے...';
+
+  @override
+  String resendCodeCountdown(int seconds) {
+    return '$seconds سیکنڈ میں دوبارہ بھیجیں';
+  }
+
+  @override
+  String get continueWithGoogle => 'Google کے ساتھ جاری رکھیں';
+
+  @override
+  String get orContinueWithGoogle => 'یا Google کے ساتھ جاری رکھیں';
+
+  @override
+  String get orContinueWithMobile => 'یا موبائل اور پاس ورڈ سے اکاؤنٹ بنائیں';
+
+  @override
+  String get googleSignupHelp =>
+      'آپ کے Household اکاؤنٹ کو فعال کرنے کے لیے تصدیق شدہ موبائل نمبر ضروری ہے۔';
+
+  @override
+  String get useMobilePasswordInstead =>
+      'اس کے بجائے موبائل اور پاس ورڈ استعمال کریں';
+
+  @override
+  String get googleAccountNotLinked =>
+      'یہ Google اکاؤنٹ ScrapWise سے منسلک نہیں ہے۔ سائن اپ کریں یا اسے موجودہ اکاؤنٹ سے جوڑیں۔';
+
+  @override
+  String get googleAccountUnavailable =>
+      'یہ اکاؤنٹ فعال نہیں یا اس کا موبائل نمبر تصدیق شدہ نہیں ہے۔';
+
+  @override
+  String get googleSignInFailed =>
+      'Google سائن اِن مکمل نہیں ہو سکا۔ دوبارہ کوشش کریں۔';
+
+  @override
+  String get googleConfigurationMissing =>
+      'اس ایپ میں Google سائن اِن ترتیب نہیں دیا گیا۔ مدد سے رابطہ کریں۔';
+
+  @override
+  String get googleIdentityInvalid =>
+      'Google سائن اِن کی مدت ختم ہو گئی یا تصدیق نہیں ہو سکی۔ دوبارہ کوشش کریں۔';
+
+  @override
+  String get googleVerificationUnavailable =>
+      'Google تصدیق عارضی طور پر دستیاب نہیں۔ بعد میں دوبارہ کوشش کریں۔';
+
+  @override
+  String get googleAccountConflict =>
+      'یہ موبائل نمبر یا Google شناخت پہلے ہی کسی اکاؤنٹ سے منسلک ہے۔ اپنے موجودہ طریقے سے سائن اِن کریں۔';
+
+  @override
+  String get linkGoogleTitle => 'اپنا Google اکاؤنٹ منسلک کریں';
+
+  @override
+  String get linkGoogleHelp =>
+      'Google منسلک کرنے سے پہلے ملکیت کی تصدیق کے لیے اپنا موبائل نمبر اور پاس ورڈ درج کریں۔';
+
+  @override
+  String get linkGoogleAccount => 'Google کو موجودہ اکاؤنٹ سے منسلک کریں';
+
+  @override
+  String get googleLinkSuccess =>
+      'Google اکاؤنٹ منسلک ہو گیا۔ اب آپ Google سے سائن اِن کر سکتے ہیں۔';
+
+  @override
+  String get reauthenticationFailed => 'پاس ورڈ غلط ہے۔ Google منسلک نہیں ہوا۔';
+
+  @override
+  String get loginInvalid => 'موبائل نمبر یا پاس ورڈ غلط ہے۔';
+
+  @override
+  String get accountAwaitingVerification =>
+      'آپ کا اکاؤنٹ تصدیق یا منظوری کا منتظر ہے۔';
+
+  @override
+  String get loginDetailsInvalid =>
+      'لاگ اِن کی تفصیلات غلط ہیں۔ براہ کرم جانچیں۔';
+
+  @override
+  String get authRateLimited =>
+      'بہت زیادہ کوششیں ہوئیں۔ بعد میں دوبارہ کوشش کریں۔';
+
+  @override
+  String get authServiceUnavailable =>
+      'تصدیق کی سروس عارضی طور پر دستیاب نہیں۔ بعد میں دوبارہ کوشش کریں۔';
 }

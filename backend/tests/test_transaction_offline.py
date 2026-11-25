@@ -170,5 +170,9 @@ def main():
     print("\nTRANSACTION WORKFLOW TEST PASSED!")
 
 
+def test_standalone_transaction_workflow():
+    main()
+
+
 if __name__ == "__main__":
     main()

@@ -34,14 +34,20 @@ Widget _testScreen(Widget screen) {
 }
 
 class _MemorySessionStore extends SessionStore {
-  @override
-  Future<void> save(String token) async {}
+  SessionCredentials? credentials;
 
   @override
-  Future<String?> read() async => null;
+  Future<void> saveSession(SessionCredentials value) async {
+    credentials = value;
+  }
 
   @override
-  Future<void> clear() async {}
+  Future<SessionCredentials?> readSession() async => credentials;
+
+  @override
+  Future<void> clear() async {
+    credentials = null;
+  }
 }
 
 void main() {
@@ -277,9 +283,7 @@ void main() {
 
         // Verify the application handles HTTP 401.
         expect(
-          find.text(
-            'Authentication failed or your session is invalid.',
-          ),
+          find.text('Invalid mobile number or password.'),
           findsOneWidget,
         );
 
